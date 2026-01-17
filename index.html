@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>לוח מודעות - בניין מגורים</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: #333;
+      overflow: hidden;
+      height: 100vh;
+    }
+
+    .container {
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      height: 100vh;
+      padding: 20px;
+      gap: 20px;
+    }
+
+    /* Header */
+    .header {
+      background: white;
+      border-radius: 12px;
+      padding: 30px 40px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      gap: 30px;
+    }
+
+    .clock-section {
+      text-align: center;
+    }
+
+    .time {
+      font-size: 72px;
+      font-weight: 700;
+      color: #667eea;
+      line-height: 1;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .date-gregorian {
+      font-size: 28px;
+      color: #555;
+      margin-top: 8px;
+    }
+
+    .divider {
+      width: 2px;
+      height: 120px;
+      background: linear-gradient(to bottom, transparent, #ddd, transparent);
+    }
+
+    .hebrew-section {
+      text-align: center;
+    }
+
+    .date-hebrew {
+      font-size: 32px;
+      font-weight: 600;
+      color: #764ba2;
+    }
+
+    .zmanim {
+      display: flex;
+      gap: 25px;
+      justify-content: center;
+      margin-top: 15px;
+      font-size: 18px;
+    }
+
+    .zman-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .zman-label {
+      color: #888;
+      font-size: 14px;
+      margin-bottom: 4px;
+    }
+
+    .zman-time {
+      font-weight: 600;
+      color: #555;
+      font-size: 20px;
+    }
+
+    /* Main Content */
+    .main-content {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 20px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 30px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      overflow: hidden;
+    }
+
+    /* Central Notice */
+    .central-notice {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      position: relative;
+      min-height: 400px;
+    }
+
+    .notice-title {
+      font-size: 36px;
+      font-weight: 700;
+      color: #667eea;
+      margin-bottom: 20px;
+    }
+
+    .notice-content {
+      font-size: 28px;
+      line-height: 1.6;
+      color: #444;
+    }
+
+    .notice-fade-enter {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+
+    .notice-fade-active {
+      opacity: 1;
+      transform: translateY(0);
+      transition: all 0.6s ease;
+    }
+
+    /* Side Notices */
+    .side-notices h2 {
+      font-size: 24px;
+      color: #764ba2;
+      margin-bottom: 20px;
+      border-bottom: 2px solid #764ba2;
+      padding-bottom: 10px;
+    }
+
+    .notice-list {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .notice-item {
+      padding: 15px;
+      background: #f8f9fa;
+      border-radius: 8px;
+      border-right: 4px solid #667eea;
+    }
+
+    .notice-item-title {
+      font-weight: 600;
+      font-size: 18px;
+      color: #333;
+      margin-bottom: 6px;
+    }
+
+    .notice-item-text {
+      font-size: 16px;
+      color: #666;
+      line-height: 1.4;
+    }
+
+    /* Footer */
+    .footer {
+      background: white;
+      border-radius: 12px;
+      padding: 20px 40px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      text-align: center;
+      overflow: hidden;
+    }
+
+    .footer-text {
+      font-size: 22px;
+      color: #555;
+      white-space: nowrap;
+    }
+
+    @keyframes slide {
+      0% { transform: translateX(100%); }
+      100% { transform: translateX(-100%); }
+    }
+
+    .footer-scroll {
+      display: inline-block;
+      animation: slide 20s linear infinite;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 1280px) {
+      .time { font-size: 60px; }
+      .notice-title { font-size: 30px; }
+      .notice-content { font-size: 24px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <div class="header">
+      <div class="clock-section">
+        <div class="time" id="time">00:00:00</div>
+        <div class="date-gregorian" id="dateGregorian"></div>
+      </div>
+      
+      <div class="divider"></div>
+      
+      <div class="hebrew-section">
+        <div class="date-hebrew" id="dateHebrew"></div>
+        <div class="zmanim">
+          <div class="zman-item">
+            <div class="zman-label">זריחה</div>
+            <div class="zman-time" id="sunrise">--:--</div>
+          </div>
+          <div class="zman-item">
+            <div class="zman-label">שקיעה</div>
+            <div class="zman-time" id="sunset">--:--</div>
+          </div>
+          <div class="zman-item">
+            <div class="zman-label">צאת כוכבים</div>
+            <div class="zman-time" id="tzait">--:--</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+      <div class="card central-notice">
+        <div class="notice-title" id="centralTitle">ברוכים הבאים</div>
+        <div class="notice-content" id="centralContent">טוען מידע...</div>
+      </div>
+
+      <div class="card side-notices">
+        <h2>הודעות</h2>
+        <div class="notice-list" id="sideNotices"></div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+      <div class="footer-text" id="footerText">
+        <span class="footer-scroll"></span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Configuration
+    const CONFIG = {
+      location: { lat: 32.0853, lng: 34.7818 }, // Tel Aviv default
+      timezone: 'Asia/Jerusalem',
+      centralNoticeInterval: 8000,
+      footerInterval: 10000
+    };
+
+    // Hebrew Date Calculation
+    function getHebrewDate() {
+      const hebrewMonths = [
+        'תשרי', 'חשוון', 'כסלו', 'טבת', 'שבט', 'אדר',
+        'ניסן', 'אייר', 'סיוון', 'תמוז', 'אב', 'אלול'
+      ];
+      
+      const now = new Date();
+      const options = { calendar: 'hebrew', year: 'numeric', month: 'long', day: 'numeric' };
+      const hebrewDateStr = new Intl.DateTimeFormat('he-IL-u-ca-hebrew', options).format(now);
+      
+      return hebrewDateStr;
+    }
+
+    // Calculate Zmanim (Jewish Prayer Times)
+    function calculateZmanim(date, lat, lng) {
+      const rad = Math.PI / 180;
+      const dayOfYear = Math.floor((date - new Date(date.getFullYear(), 0, 0)) / 86400000);
+      const declination = 23.45 * Math.sin(rad * (360 / 365) * (dayOfYear - 81));
+      
+      const hourAngle = Math.acos(-Math.tan(rad * lat) * Math.tan(rad * declination)) / rad;
+      const noon = 12 - (lng / 15);
+      
+      const sunrise = noon - (hourAngle / 15);
+      const sunset = noon + (hourAngle / 15);
+      const tzait = sunset + 0.75; // 45 minutes after sunset (simplified)
+      
+      const formatTime = (hours) => {
+        const h = Math.floor(hours);
+        const m = Math.floor((hours - h) * 60);
+        return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+      };
+      
+      return {
+        sunrise: formatTime(sunrise),
+        sunset: formatTime(sunset),
+        tzait: formatTime(tzait)
+      };
+    }
+
+    // Update Clock
+    function updateClock() {
+      const now = new Date();
+      
+      // Time
+      const time = now.toLocaleTimeString('he-IL', { 
+        hour: '2-digit', 
+        minute: '2-digit', 
+        second: '2-digit',
+        hour12: false 
+      });
+      document.getElementById('time').textContent = time;
+      
+      // Gregorian Date
+      const dateGreg = now.toLocaleDateString('he-IL', { 
+        weekday: 'long', 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric' 
+      });
+      document.getElementById('dateGregorian').textContent = dateGreg;
+      
+      // Hebrew Date
+      document.getElementById('dateHebrew').textContent = getHebrewDate();
+      
+      // Zmanim (update once per day)
+      if (!window.zmanimUpdated || now.getHours() === 0 && now.getMinutes() === 0) {
+        const zmanim = calculateZmanim(now, CONFIG.location.lat, CONFIG.location.lng);
+        document.getElementById('sunrise').textContent = zmanim.sunrise;
+        document.getElementById('sunset').textContent = zmanim.sunset;
+        document.getElementById('tzait').textContent = zmanim.tzait;
+        window.zmanimUpdated = true;
+      }
+    }
+
+    // Load Data
+    let centralNotices = [];
+    let sideNotices = [];
+    let footerMessages = [];
+    let currentCentralIndex = 0;
+    let currentFooterIndex = 0;
+
+    async function loadData() {
+      try {
+        // In production, load from JSON files
+        // For demo, using inline data
+        centralNotices = [
+          { title: "שבת שלום", content: "זמני כניסת ויציאת השבת יופיעו כאן" },
+          { title: "הודעה חשובה", content: "תחזוקה מתוכננת ביום ראשון 08:00-12:00" },
+          { title: "תזכורת", content: "אנא לא להשאיר חפצים במסדרון" }
+        ];
+        
+        sideNotices = [
+          { title: "שעות פעילות מעלית", text: "24/7" },
+          { title: "איסוף דואר", text: "יום א'-ה' 08:00-17:00" },
+          { title: "גביית ארנונה", text: "עד ה-10 לחודש" },
+          { title: "מספר חירום", text: "שומר: 050-1234567" }
+        ];
+        
+        footerMessages = [
+          "שמירה על הניקיון במרחבים המשותפים - תודה לכם!",
+          "בכל בעיה ניתן לפנות למוקד השירות בטלפון 03-1234567",
+          "אנא לנעול את דלת הכניסה הראשית אחריכם"
+        ];
+        
+        displaySideNotices();
+        rotateCentralNotice();
+        rotateFooter();
+      } catch (error) {
+        console.error('Error loading data:', error);
+      }
+    }
+
+    function displaySideNotices() {
+      const container = document.getElementById('sideNotices');
+      container.innerHTML = sideNotices.map(notice => `
+        <div class="notice-item">
+          <div class="notice-item-title">${notice.title}</div>
+          <div class="notice-item-text">${notice.text}</div>
+        </div>
+      `).join('');
+    }
+
+    function rotateCentralNotice() {
+      const titleEl = document.getElementById('centralTitle');
+      const contentEl = document.getElementById('centralContent');
+      
+      const notice = centralNotices[currentCentralIndex];
+      
+      titleEl.classList.remove('notice-fade-active');
+      contentEl.classList.remove('notice-fade-active');
+      titleEl.classList.add('notice-fade-enter');
+      contentEl.classList.add('notice-fade-enter');
+      
+      setTimeout(() => {
+        titleEl.textContent = notice.title;
+        contentEl.textContent = notice.content;
+        titleEl.classList.remove('notice-fade-enter');
+        contentEl.classList.remove('notice-fade-enter');
+        titleEl.classList.add('notice-fade-active');
+        contentEl.classList.add('notice-fade-active');
+      }, 100);
+      
+      currentCentralIndex = (currentCentralIndex + 1) % centralNotices.length;
+      setTimeout(rotateCentralNotice, CONFIG.centralNoticeInterval);
+    }
+
+    function rotateFooter() {
+      const footerEl = document.querySelector('.footer-scroll');
+      footerEl.textContent = footerMessages[currentFooterIndex];
+      
+      currentFooterIndex = (currentFooterIndex + 1) % footerMessages.length;
+      setTimeout(rotateFooter, CONFIG.footerInterval);
+    }
+
+    // Initialize
+    updateClock();
+    setInterval(updateClock, 1000);
+    loadData();
+
+    // Update zmanim daily
+    setInterval(() => {
+      window.zmanimUpdated = false;
+    }, 86400000);
+  </script>
+</body>
+</html>
