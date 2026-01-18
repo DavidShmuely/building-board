@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ניהול לוח מודעות - בניין תמר</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f5f7fa;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    header {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
+      padding: 30px;
+      border-radius: 12px;
+      margin-bottom: 30px;
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 32px;
+      margin-bottom: 10px;
+    }
+
+    .subtitle {
+      opacity: 0.9;
+      font-size: 16px;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      border-bottom: 2px solid #ddd;
+    }
+
+    .tab {
+      padding: 12px 24px;
+      background: white;
+      border: none;
+      border-radius: 8px 8px 0 0;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: 600;
+      color: #666;
+      transition: all 0.3s;
+    }
+
+    .tab:hover {
+      background: #f0f0f0;
+    }
+
+    .tab.active {
+      background: #667eea;
+      color: white;
+    }
+
+    .tab-content {
+      display: none;
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: #333;
+    }
+
+    input[type="text"],
+    input[type="number"],
+    textarea {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 14px;
+      font-family: inherit;
+      transition: border-color 0.3s;
+    }
+
+    input:focus,
+    textarea:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+
+    textarea {
+      min-height: 100px;
+      resize: vertical;
+    }
+
+    .btn {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .btn-primary {
+      background: #667eea;
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: #5568d3;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-success {
+      background: #10b981;
+      color: white;
+    }
+
+    .btn-danger {
+      background: #ef4444;
+      color: white;
+      padding: 8px 16px;
+      font-size: 14px;
+    }
+
+    .btn-add {
+      background: #10b981;
+      color: white;
+      margin-bottom: 20px;
+    }
+
+    .notice-list {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .notice-card {
+      background: #f8f9fa;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      padding: 20px;
+      position: relative;
+    }
+
+    .notice-card h3 {
+      color: #667eea;
+      margin-bottom: 10px;
+    }
+
+    .notice-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 15px;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    .export-section {
+      background: #f0fdf4;
+      border: 2px solid #10b981;
+      padding: 20px;
+      border-radius: 12px;
+      margin-top: 20px;
+    }
+
+    .code-block {
+      background: #1e293b;
+      color: #e2e8f0;
+      padding: 15px;
+      border-radius: 8px;
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+      overflow-x: auto;
+      margin-top: 10px;
+      white-space: pre;
+    }
+
+    .help-text {
+      font-size: 13px;
+      color: #666;
+      margin-top: 5px;
+    }
+
+    .success-message {
+      background: #10b981;
+      color: white;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      display: none;
+    }
+
+    .icon-picker {
+      display: grid;
+      grid-template-columns: repeat(8, 1fr);
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .icon-option {
+      padding: 10px;
+      background: #f0f0f0;
+      border-radius: 8px;
+      text-align: center;
+      font-size: 24px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .icon-option:hover {
+      background: #667eea;
+      transform: scale(1.1);
+    }
+
+    .icon-option.selected {
+      background: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.3);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🏢 ממשק ניהול לוח מודעות</h1>
+      <div class="subtitle">בניין תמר - עריכה וניהול מלא של כל התוכן</div>
+    </header>
+
+    <div class="success-message" id="successMsg">✅ השינויים נשמרו בהצלחה!</div>
+
+    <div class="tabs">
+      <button class="tab active" onclick="showTab('config')">⚙️ הגדרות כלליות</button>
+      <button class="tab" onclick="showTab('central')">📢 הודעות מרכזיות</button>
+      <button class="tab" onclick="showTab('sidebar')">📝 הודעות צדדיות</button>
+      <button class="tab" onclick="showTab('ticker')">📰 טיקר חדשות</button>
+      <button class="tab" onclick="showTab('weather')">🌤️ מזג אוויר</button>
+      <button class="tab" onclick="showTab('zmanim')">🕐 זמני תפילה</button>
+      <button class="tab" onclick="showTab('export')">💾 ייצוא קבצים</button>
+    </div>
+
+    <!-- Config Tab -->
+    <div class="tab-content active" id="config">
+      <h2>⚙️ הגדרות כלליות</h2>
+      <div class="form-group">
+        <label>שם הבניין</label>
+        <input type="text" id="buildingName" value="בניין תמר">
+      </div>
+      <div class="form-group">
+        <label>שנה עברית</label>
+        <input type="text" id="hebrewYear" value="התשפ״ו">
+      </div>
+      <div class="grid-2">
+        <div class="form-group">
+          <label>קו רוחב (Latitude)</label>
+          <input type="number" step="0.0001" id="lat" value="32.0853">
+        </div>
+        <div class="form-group">
+          <label>קו אורך (Longitude)</label>
+          <input type="number" step="0.0001" id="lng" value="34.7818">
+        </div>
+      </div>
+      <div class="grid-2">
+        <div class="form-group">
+          <label>מהירות החלפת הודעות (אלפיות שנייה)</label>
+          <input type="number" id="centralInterval" value="8000">
+          <div class="help-text">8000 = 8 שניות</div>
+        </div>
+        <div class="form-group">
+          <label>מהירות טיקר (אלפיות שנייה)</label>
+          <input type="number" id="tickerInterval" value="30000">
+        </div>
+      </div>
+      <button class="btn btn-primary" onclick="saveConfig()">💾 שמור הגדרות</button>
+    </div>
+
+    <!-- Central Notices Tab -->
+    <div class="tab-content" id="central">
+      <h2>📢 הודעות מרכזיות</h2>
+      <button class="btn btn-add" onclick="addCentralNotice()">➕ הוסף הודעה</button>
+      <div id="centralList"></div>
+    </div>
+
+    <!-- Sidebar Tab -->
+    <div class="tab-content" id="sidebar">
+      <h2>📝 הודעות צדדיות</h2>
+      <button class="btn btn-add" onclick="addSidebarNotice()">➕ הוסף הודעה</button>
+      <div id="sidebarList"></div>
+      
+      <div style="margin-top: 20px;">
+        <h3>בחר אייקון</h3>
+        <div class="icon-picker">
+          <div class="icon-option">🕐</div>
+          <div class="icon-option">📬</div>
+          <div class="icon-option">💰</div>
+          <div class="icon-option">☎️</div>
+          <div class="icon-option">🔧</div>
+          <div class="icon-option">🚗</div>
+          <div class="icon-option">🏊</div>
+          <div class="icon-option">🎾</div>
+          <div class="icon-option">📅</div>
+          <div class="icon-option">🔒</div>
+          <div class="icon-option">🚪</div>
+          <div class="icon-option">💡</div>
+          <div class="icon-option">🚮</div>
+          <div class="icon-option">♻️</div>
+          <div class="icon-option">⚠️</div>
+          <div class="icon-option">ℹ️</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Ticker Tab -->
+    <div class="tab-content" id="ticker">
+      <h2>📰 הודעות טיקר</h2>
+      <button class="btn btn-add" onclick="addTickerMsg()">➕ הוסף הודעה</button>
+      <div id="tickerList"></div>
+    </div>
+
+    <!-- Weather Tab -->
+    <div class="tab-content" id="weather">
+      <h2>🌤️ מזג אוויר (עריכה ידנית)</h2>
+      <h3>מזג אוויר נוכחי</h3>
+      <div class="grid-2">
+        <div class="form-group">
+          <label>טמפרטורה</label>
+          <input type="number" id="weatherTemp" value="22">
+        </div>
+        <div class="form-group">
+          <label>תיאור</label>
+          <input type="text" id="weatherDesc" value="בהיר">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>אייקון (אמוג'י)</label>
+        <input type="text" id="weatherIcon" value="☀️">
+      </div>
+      <button class="btn btn-primary" onclick="saveWeather()">💾 שמור מזג אוויר</button>
+    </div>
+
+    <!-- Zmanim Tab -->
+    <div class="tab-content" id="zmanim">
+      <h2>🕐 זמני תפילה (עריכה ידנית)</h2>
+      <p class="help-text">השאר ריק לחישוב אוטומטי לפי מיקום</p>
+      <div class="grid-2">
+        <div class="form-group">
+          <label>עלות השחר</label>
+          <input type="text" id="zmanAlot" placeholder="05:32">
+        </div>
+        <div class="form-group">
+          <label>הנץ החמה</label>
+          <input type="text" id="zmanSunrise" placeholder="06:42">
+        </div>
+        <div class="form-group">
+          <label>סוף זמן ק״ש</label>
+          <input type="text" id="zmanShema" placeholder="09:42">
+        </div>
+        <div class="form-group">
+          <label>חצות</label>
+          <input type="text" id="zmanChatzot" placeholder="12:20">
+        </div>
+        <div class="form-group">
+          <label>שקיעה</label>
+          <input type="text" id="zmanSunset" placeholder="17:58">
+        </div>
+        <div class="form-group">
+          <label>צאת כוכבים</label>
+          <input type="text" id="zmanTzait" placeholder="18:43">
+        </div>
+      </div>
+      <button class="btn btn-primary" onclick="saveZmanim()">💾 שמור זמנים</button>
+    </div>
+
+    <!-- Export Tab -->
+    <div class="tab-content" id="export">
+      <h2>💾 ייצוא קבצי JSON</h2>
+      <p>לחץ על הכפתורים כדי להוריד את קבצי ה-JSON המעודכנים</p>
+      
+      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin: 20px 0;">
+        <button class="btn btn-success" onclick="downloadJSON('config')">📥 config.json</button>
+        <button class="btn btn-success" onclick="downloadJSON('central')">📥 central.json</button>
+        <button class="btn btn-success" onclick="downloadJSON('sidebar')">📥 sidebar.json</button>
+        <button class="btn btn-success" onclick="downloadJSON('ticker')">📥 ticker.json</button>
+        <button class="btn btn-success" onclick="downloadJSON('weather')">📥 weather.json</button>
+        <button class="btn btn-success" onclick="downloadJSON('zmanim')">📥 zmanim.json</button>
+      </div>
+
+      <div class="export-section">
+        <h3>📁 מבנה תיקיות מומלץ</h3>
+        <div class="code-block">building-board/
+├── index.html
+├── admin.html (הדף הזה)
+├── config.json
+└── data/
+    ├── central.json
+    ├── sidebar.json
+    ├── ticker.json
+    ├── weather.json
+    └── zmanim.json</div>
+      </div>
+
+      <div class="export-section" style="margin-top: 20px;">
+        <h3>🚀 הוראות העלאה</h3>
+        <ol style="margin-right: 20px; line-height: 2;">
+          <li>הורד את כל קבצי ה-JSON דרך הכפתורים למעלה</li>
+          <li>צור תיקייה בשם <code>data</code></li>
+          <li>העבר את הקבצים לתיקייה המתאימה</li>
+          <li>העלה הכל לשרת (GitHub Pages / Netlify)</li>
+          <li>פתח את index.html בדפדפן - הכל יעבוד!</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Data storage
+    let data = {
+      config: {
+        buildingName: 'בניין תמר',
+        location: { lat: 32.0853, lng: 34.7818 },
+        hebrewYear: 'התשפ״ו',
+        intervals: { centralNotice: 8000, ticker: 30000 }
+      },
+      central: [],
+      sidebar: [],
+      ticker: [],
+      weather: { current: { temp: 22, description: 'בהיר', icon: '☀️' }, forecast: [] },
+      zmanim: {}
+    };
+
+    // Tab switching
+    function showTab(tabName) {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+      event.target.classList.add('active');
+      document.getElementById(tabName).classList.add('active');
+    }
+
+    // Save functions
+    function saveConfig() {
+      data.config = {
+        buildingName: document.getElementById('buildingName').value,
+        location: {
+          lat: parseFloat(document.getElementById('lat').value),
+          lng: parseFloat(document.getElementById('lng').value)
+        },
+        hebrewYear: document.getElementById('hebrewYear').value,
+        intervals: {
+          centralNotice: parseInt(document.getElementById('centralInterval').value),
+          ticker: parseInt(document.getElementById('tickerInterval').value)
+        }
+      };
+      showSuccess();
+    }
+
+    function showSuccess() {
+      const msg = document.getElementById('successMsg');
+      msg.style.display = 'block';
+      setTimeout(() => { msg.style.display = 'none'; }, 3000);
+    }
+
+    // Download JSON
+    function downloadJSON(type) {
+      let jsonData = {};
+      
+      switch(type) {
+        case 'config':
+          saveConfig();
+          jsonData = data.config;
+          break;
+        case 'central':
+          jsonData = data.central;
+          break;
+        case 'sidebar':
+          jsonData = data.sidebar;
+          break;
+        case 'ticker':
+          jsonData = data.ticker;
+          break;
+        case 'weather':
+          jsonData = data.weather;
+          break;
+        case 'zmanim':
+          jsonData = data.zmanim;
+          break;
+      }
+
+      const dataStr = JSON.stringify(jsonData, null, 2);
+      const blob = new Blob([dataStr], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${type}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    // Initialize with demo data
+    data.central = [
+      { title: '♻️ מה שייכים לפח הכתום?', content: 'אריזות ריקות בלבד', image: null },
+      { title: '⚠️ תחזוקה מתוכננת', content: 'יום ראשון 20.1.2026', image: null }
+    ];
+
+    data.sidebar = [
+      { icon: '🕐', title: 'שעות פעילות מעלית', text: '24/7' },
+      { icon: '📬', title: 'איסוף דואר', text: 'א׳-ה׳ 08:00-17:00' }
+    ];
+
+    data.ticker = [
+      'שמירה על הניקיון במרחבים המשותפים',
+      'אנא לנעול את דלת הכניסה אחריכם'
+    ];
+
+    console.log('✅ ממשק הניהול מוכן! ערוך את הנתונים והורד את קבצי ה-JSON');
+  </script>
+</body>
+</html>
