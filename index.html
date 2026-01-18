@@ -328,13 +328,6 @@
       0% { transform: translateX(100%); }
       100% { transform: translateX(-100%); }
     }
-
-    /* Responsive adjustments */
-    @media (max-width: 1280px) {
-      .time { font-size: 48px; }
-      .notice-title { font-size: 30px; }
-      .notice-content { font-size: 20px; }
-    }
   </style>
 </head>
 <body>
@@ -343,47 +336,25 @@
     <div class="header">
       <div class="logo-section">
         <div class="building-icon">
-          <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Crect fill='%23f4e4c1' width='200' height='200'/%3E%3Ctext x='100' y='100' text-anchor='middle' dominant-baseline='middle' font-size='60' fill='%23d4924e'%3E🏢%3C/text%3E%3C/svg%3E" alt="בניין תמר">
+          <img id="buildingLogo" src="" alt="לוגו בניין">
         </div>
-        <div class="building-name">בניין תמר</div>
+        <div class="building-name" id="buildingName">טוען...</div>
       </div>
 
       <div class="header-center">
         <div class="time" id="time">00:00:00</div>
         <div class="dates">
           <span id="dateGregorian">טוען...</span>
-          <span class="date-hebrew">התשפ״ו</span>
+          <span class="date-hebrew" id="hebrewYear">התשפ״ו</span>
         </div>
       </div>
 
-      <div class="weather-widget">
+      <div class="weather-widget" id="weatherWidget">
         <div class="weather-current">
           <div class="weather-icon">☀️</div>
           <div>
-            <div class="weather-temp">22°</div>
-            <div class="weather-desc">בהיר</div>
-          </div>
-        </div>
-        <div class="weather-forecast">
-          <div class="forecast-item">
-            <div class="forecast-day">יום א׳</div>
-            <div class="forecast-icon">☀️</div>
-            <div class="forecast-temp">24°</div>
-          </div>
-          <div class="forecast-item">
-            <div class="forecast-day">יום ב׳</div>
-            <div class="forecast-icon">⛅</div>
-            <div class="forecast-temp">23°</div>
-          </div>
-          <div class="forecast-item">
-            <div class="forecast-day">יום ג׳</div>
-            <div class="forecast-icon">🌤️</div>
-            <div class="forecast-temp">21°</div>
-          </div>
-          <div class="forecast-item">
-            <div class="forecast-day">יום ד׳</div>
-            <div class="forecast-icon">☀️</div>
-            <div class="forecast-temp">25°</div>
+            <div class="weather-temp">--°</div>
+            <div class="weather-desc">טוען...</div>
           </div>
         </div>
       </div>
@@ -396,34 +367,33 @@
         <div class="zmanim-bar">
           <div class="zman-item">
             <div class="zman-label">עלות השחר</div>
-            <div class="zman-time" id="alot">05:32</div>
+            <div class="zman-time" id="alot">--:--</div>
           </div>
           <div class="zman-item">
             <div class="zman-label">הנץ החמה</div>
-            <div class="zman-time" id="sunrise">06:42</div>
+            <div class="zman-time" id="sunrise">--:--</div>
           </div>
           <div class="zman-item">
             <div class="zman-label">סוף זמן ק״ש</div>
-            <div class="zman-time" id="shema">09:42</div>
+            <div class="zman-time" id="shema">--:--</div>
           </div>
           <div class="zman-item">
             <div class="zman-label">חצות</div>
-            <div class="zman-time" id="chatzot">12:20</div>
+            <div class="zman-time" id="chatzot">--:--</div>
           </div>
           <div class="zman-item">
             <div class="zman-label">שקיעה</div>
-            <div class="zman-time" id="sunset">17:58</div>
+            <div class="zman-time" id="sunset">--:--</div>
           </div>
           <div class="zman-item">
             <div class="zman-label">צאת כוכבים</div>
-            <div class="zman-time" id="tzait">18:43</div>
+            <div class="zman-time" id="tzait">--:--</div>
           </div>
         </div>
 
         <!-- Central Notice -->
         <div class="card central-notice" id="centralNotice">
-          <div class="notice-title">♻️ מה שייכים לפח הכתום?</div>
-          <div class="notice-content">אריזות ריקות בלבד:<br>• אריזות מזון 🥫<br>• אריזות משקה 🧃<br>• אריזות שקשוק 🧴</div>
+          <div class="notice-title">טוען הודעות...</div>
         </div>
       </div>
 
@@ -434,42 +404,8 @@
             <span>📢</span>
             <span>הודעות לדיירים</span>
           </div>
-          <div class="notice-list">
-            <div class="notice-item">
-              <div class="notice-item-title">
-                <span class="notice-item-icon">🕐</span>
-                שעות פעילות מעלית
-              </div>
-              <div class="notice-item-text">24/7</div>
-            </div>
-            <div class="notice-item">
-              <div class="notice-item-title">
-                <span class="notice-item-icon">📬</span>
-                איסוף דואר
-              </div>
-              <div class="notice-item-text">א׳-ה׳ 08:00-17:00</div>
-            </div>
-            <div class="notice-item">
-              <div class="notice-item-title">
-                <span class="notice-item-icon">💰</span>
-                גביית ארנונה
-              </div>
-              <div class="notice-item-text">עד ה-10 לחודש</div>
-            </div>
-            <div class="notice-item">
-              <div class="notice-item-title">
-                <span class="notice-item-icon">☎️</span>
-                מספר חירום
-              </div>
-              <div class="notice-item-text">שומר: 050-1234567</div>
-            </div>
-            <div class="notice-item">
-              <div class="notice-item-title">
-                <span class="notice-item-icon">🔧</span>
-                תחזוקה
-              </div>
-              <div class="notice-item-text">יצחק: 052-9876543</div>
-            </div>
+          <div class="notice-list" id="sideNotices">
+            <div>טוען...</div>
           </div>
         </div>
       </div>
@@ -478,62 +414,186 @@
     <!-- Footer Ticker -->
     <div class="footer">
       <div class="ticker-label">חדשות</div>
-      <div class="ticker-content">
-        שמירה על הניקיון במרחבים המשותפים - תודה רבה! 🧹 • אנא לנעול את דלת הכניסה אחריכם 🔒 • בכל בעיה ניתן לפנות למוקד השירות: 03-1234567 📞 • תזכורת: תשלום ועד בית עד ה-5 לחודש 💳 • חניה במקומות המיועדים בלבד 🚗
-      </div>
+      <div class="ticker-content" id="ticker">טוען הודעות...</div>
     </div>
   </div>
 
   <script>
-    // Data
-    const NOTICES = [
-      {
-        title: '♻️ מה שייכים לפח הכתום?',
-        content: 'אריזות ריקות בלבד:<br>• אריזות מזון 🥫<br>• אריזות משקה 🧃<br>• אריזות שקשוק 🧴'
-      },
-      {
-        title: '⚠️ תחזוקה מתוכננת',
-        content: 'יום ראשון 20.1.2026<br>שעות 08:00-12:00<br>הפסקת מים במדרגה ב׳'
-      },
-      {
-        title: '🕯️ שבת שלום',
-        content: 'כניסת שבת: 17:23<br>יציאת שבת: 18:35<br>פרשת השבוע: וארא'
-      }
-    ];
-
+    // Global config
+    let CONFIG = {};
+    let centralNotices = [];
+    let sidebarNotices = [];
+    let tickerMessages = [];
+    let weatherData = null;
+    let zmanimData = null;
     let noticeIndex = 0;
 
-    // Clock
-    function updateClock() {
-      const now = new Date();
-      document.getElementById('time').textContent = now.toLocaleTimeString('he-IL', { 
-        hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false 
-      });
-      document.getElementById('dateGregorian').textContent = now.toLocaleDateString('he-IL', { 
-        weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' 
-      });
+    // Load JSON with fallback to inline data
+    async function loadJSON(url, fallback) {
+      try {
+        const response = await fetch(url);
+        if (!response.ok) throw new Error('File not found');
+        return await response.json();
+      } catch (error) {
+        console.log(`Using fallback data for ${url}`);
+        return fallback;
+      }
     }
 
-    // Rotate notices
+    // Initialize all data
+    async function initData() {
+      // Load config
+      CONFIG = await loadJSON('config.json', {
+        buildingName: 'בניין תמר',
+        location: { lat: 32.0853, lng: 34.7818, city: 'תל אביב-יפו' },
+        hebrewYear: 'התשפ״ו',
+        intervals: { centralNotice: 8000, ticker: 30000 },
+        logo: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="200" height="200"%3E%3Crect fill="%23f4e4c1" width="200" height="200"/%3E%3Ctext x="100" y="100" text-anchor="middle" dominant-baseline="middle" font-size="60" fill="%23d4924e"%3E🏢%3C/text%3E%3C/svg%3E'
+      });
+
+      // Load central notices
+      centralNotices = await loadJSON('data/central.json', [
+        {
+          title: '♻️ מה שייכים לפח הכתום?',
+          content: 'אריזות ריקות בלבד:<br>• אריזות מזון 🥫<br>• אריזות משקה 🧃<br>• אריזות שקשוק 🧴',
+          image: null
+        },
+        {
+          title: '⚠️ תחזוקה מתוכננת',
+          content: 'יום ראשון 20.1.2026<br>שעות 08:00-12:00<br>הפסקת מים במדרגה ב׳',
+          image: null
+        },
+        {
+          title: '🕯️ שבת שלום',
+          content: 'כניסת שבת: 17:23<br>יציאת שבת: 18:35<br>פרשת השבוע: וארא',
+          image: null
+        }
+      ]);
+
+      // Load sidebar notices
+      sidebarNotices = await loadJSON('data/sidebar.json', [
+        { icon: '🕐', title: 'שעות פעילות מעלית', text: '24/7' },
+        { icon: '📬', title: 'איסוף דואר', text: 'א׳-ה׳ 08:00-17:00' },
+        { icon: '💰', title: 'גביית ארנונה', text: 'עד ה-10 לחודש' },
+        { icon: '☎️', title: 'מספר חירום', text: 'שומר: 050-1234567' },
+        { icon: '🔧', title: 'תחזוקה', text: 'יצחק: 052-9876543' }
+      ]);
+
+      // Load ticker messages
+      tickerMessages = await loadJSON('data/ticker.json', [
+        'שמירה על הניקיון במרחבים המשותפים - תודה רבה! 🧹',
+        'אנא לנעול את דלת הכניסה אחריכם 🔒',
+        'בכל בעיה ניתן לפנות למוקד השירות: 03-1234567 📞',
+        'תזכורת: תשלום ועד בית עד ה-5 לחודש 💳',
+        'חניה במקומות המיועדים בלבד 🚗'
+      ]);
+
+      // Load weather
+      weatherData = await loadJSON('data/weather.json', {
+        current: { temp: 22, description: 'בהיר', icon: '☀️' },
+        forecast: [
+          { day: 'יום א׳', icon: '☀️', temp: 24 },
+          { day: 'יום ב׳', icon: '⛅', temp: 23 },
+          { day: 'יום ג׳', icon: '🌤️', temp: 21 },
+          { day: 'יום ד׳', icon: '☀️', temp: 25 }
+        ]
+      });
+
+      // Load zmanim (optional - will calculate if not provided)
+      zmanimData = await loadJSON('data/zmanim.json', null);
+
+      // Apply config
+      document.getElementById('buildingName').textContent = CONFIG.buildingName;
+      document.getElementById('hebrewYear').textContent = CONFIG.hebrewYear;
+      document.getElementById('buildingLogo').src = CONFIG.logo;
+
+      // Display data
+      displayWeather();
+      displaySidebar();
+      displayTicker();
+      if (zmanimData) {
+        displayZmanim();
+      } else {
+        calculateZmanim();
+      }
+      rotateNotice();
+    }
+
+    // Display functions
+    function displayWeather() {
+      const html = `
+        <div class="weather-current">
+          <div class="weather-icon">${weatherData.current.icon}</div>
+          <div>
+            <div class="weather-temp">${weatherData.current.temp}°</div>
+            <div class="weather-desc">${weatherData.current.description}</div>
+          </div>
+        </div>
+        <div class="weather-forecast">
+          ${weatherData.forecast.map(day => `
+            <div class="forecast-item">
+              <div class="forecast-day">${day.day}</div>
+              <div class="forecast-icon">${day.icon}</div>
+              <div class="forecast-temp">${day.temp}°</div>
+            </div>
+          `).join('')}
+        </div>
+      `;
+      document.getElementById('weatherWidget').innerHTML = html;
+    }
+
+    function displaySidebar() {
+      const html = sidebarNotices.map(n => `
+        <div class="notice-item">
+          <div class="notice-item-title">
+            <span class="notice-item-icon">${n.icon}</span>
+            ${n.title}
+          </div>
+          <div class="notice-item-text">${n.text}</div>
+        </div>
+      `).join('');
+      document.getElementById('sideNotices').innerHTML = html;
+    }
+
+    function displayTicker() {
+      const text = tickerMessages.join(' • ');
+      document.getElementById('ticker').textContent = text + ' • ' + text;
+    }
+
+    function displayZmanim() {
+      document.getElementById('alot').textContent = zmanimData.alot;
+      document.getElementById('sunrise').textContent = zmanimData.sunrise;
+      document.getElementById('shema').textContent = zmanimData.shema;
+      document.getElementById('chatzot').textContent = zmanimData.chatzot;
+      document.getElementById('sunset').textContent = zmanimData.sunset;
+      document.getElementById('tzait').textContent = zmanimData.tzait;
+    }
+
     function rotateNotice() {
       const el = document.getElementById('centralNotice');
       el.style.opacity = '0';
       
       setTimeout(() => {
-        const notice = NOTICES[noticeIndex];
-        el.innerHTML = `
+        const notice = centralNotices[noticeIndex];
+        let html = '';
+        if (notice.image) {
+          html += `<img src="${notice.image}" class="notice-image" alt="${notice.title}">`;
+        }
+        html += `
           <div class="notice-title">${notice.title}</div>
           <div class="notice-content">${notice.content}</div>
         `;
+        el.innerHTML = html;
         el.style.opacity = '1';
-        noticeIndex = (noticeIndex + 1) % NOTICES.length;
+        noticeIndex = (noticeIndex + 1) % centralNotices.length;
       }, 500);
     }
 
-    // Calculate Zmanim
-    function calcZmanim() {
+    // Calculate zmanim if not provided
+    function calculateZmanim() {
       const now = new Date();
-      const lat = 32.0853, lng = 34.7818;
+      const lat = CONFIG.location.lat;
+      const lng = CONFIG.location.lng;
       const rad = Math.PI / 180;
       const dayOfYear = Math.floor((now - new Date(now.getFullYear(), 0, 0)) / 86400000);
       const dec = 23.45 * Math.sin(rad * (360 / 365) * (dayOfYear - 81));
@@ -556,12 +616,22 @@
       document.getElementById('tzait').textContent = fmt(sunset + 0.75);
     }
 
+    // Clock
+    function updateClock() {
+      const now = new Date();
+      document.getElementById('time').textContent = now.toLocaleTimeString('he-IL', { 
+        hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false 
+      });
+      document.getElementById('dateGregorian').textContent = now.toLocaleDateString('he-IL', { 
+        weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' 
+      });
+    }
+
     // Init
+    initData();
     updateClock();
     setInterval(updateClock, 1000);
-    calcZmanim();
-    setInterval(calcZmanim, 3600000);
-    setInterval(rotateNotice, 8000);
+    setInterval(() => rotateNotice(), CONFIG.intervals?.centralNotice || 8000);
   </script>
 </body>
 </html>
