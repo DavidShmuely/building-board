@@ -47,14 +47,20 @@
     }
 
     .building-icon {
-      width: 60px;
-      height: 60px;
-      background: rgba(255,255,255,0.2);
+      width: 80px;
+      height: 80px;
+      background: white;
       border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 32px;
+      padding: 5px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+      overflow: hidden;
+    }
+
+    .building-icon img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 8px;
     }
 
     .building-name {
@@ -369,7 +375,9 @@
     <!-- Header -->
     <div class="header">
       <div class="logo-section">
-        <div class="building-icon">🏢</div>
+        <div class="building-icon">
+          <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==" alt="בניין תמר" id="buildingLogo">
+        </div>
         <div class="building-name" id="buildingName">בניין מגורים</div>
       </div>
 
@@ -455,7 +463,7 @@
   <script>
     // ============= CONFIGURATION =============
     const CONFIG = {
-      buildingName: 'בניין רחוב הרצל 35',
+      buildingName: 'בניין תמר',
       location: {
         lat: 32.0853,
         lng: 34.7818,
@@ -478,15 +486,10 @@
     // ============= HEBREW DATE CALCULATION =============
     function getHebrewDate() {
       try {
-        const options = { 
-          calendar: 'hebrew', 
-          year: 'numeric', 
-          month: 'long', 
-          day: 'numeric' 
-        };
-        return new Intl.DateTimeFormat('he-IL-u-ca-hebrew', options).format(new Date());
+        // Return Hebrew year in letters
+        return 'התשפ״ו';
       } catch (e) {
-        return 'תאריך עברי';
+        return 'התשפ״ו';
       }
     }
 
@@ -736,18 +739,6 @@
     // ============= INITIALIZATION =============
     document.getElementById('buildingName').textContent = CONFIG.buildingName;
     
-    updateClock();
-    setInterval(updateClock, 1000);
-    
-    fetchWeather();
-    setInterval(fetchWeather, 1800000); // Update weather every 30 minutes
-    
-    loadData();
-    
-    // Daily zmanim reset
-    setInterval(() => {
-      window.zmanimUpdated = false;
-    }, 86400000);
-  </script>
-</body>
-</html>
+    // Building logo - embedded image
+    const logoImg = document.getElementById('buildingLogo');
+    logoImg.src = 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCADcANwDASIAAhEB
