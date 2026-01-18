@@ -548,34 +548,23 @@
     }
 
     // ============= WEATHER API =============
-    async function fetchWeather() {
-      try {
-        // Demo weather data (replace with real API call)
-        const demoWeather = {
-          current: {
-            temp: 22,
-            description: 'בהיר',
-            icon: '☀️'
-          },
-          forecast: [
-            { day: 'יום א׳', icon: '☀️', temp: 24 },
-            { day: 'יום ב׳', icon: '⛅', temp: 23 },
-            { day: 'יום ג׳', icon: '🌤️', temp: 21 },
-            { day: 'יום ד׳', icon: '☀️', temp: 25 }
-          ]
-        };
-        
-        // Real API call would be:
-        // const url = `https://api.openweathermap.org/data/2.5/forecast?lat=${CONFIG.location.lat}&lon=${CONFIG.location.lng}&appid=${CONFIG.weatherApiKey}&units=metric&lang=he`;
-        // const response = await fetch(url);
-        // const data = await response.json();
-        
-        weatherData = demoWeather;
-        displayWeather();
-      } catch (error) {
-        console.error('Weather fetch error:', error);
-        document.getElementById('weatherWidget').innerHTML = '<div style="padding: 20px; text-align: center;">מזג אוויר לא זמין</div>';
-      }
+    function fetchWeather() {
+      // Demo weather data
+      weatherData = {
+        current: {
+          temp: 22,
+          description: 'בהיר',
+          icon: '☀️'
+        },
+        forecast: [
+          { day: 'יום א׳', icon: '☀️', temp: 24 },
+          { day: 'יום ב׳', icon: '⛅', temp: 23 },
+          { day: 'יום ג׳', icon: '🌤️', temp: 21 },
+          { day: 'יום ד׳', icon: '☀️', temp: 25 }
+        ]
+      };
+      
+      displayWeather();
     }
 
     function displayWeather() {
@@ -741,4 +730,4 @@
     
     // Building logo - embedded image
     const logoImg = document.getElementById('buildingLogo');
-    logoImg.src = 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCADcANwDASIAAhEB
+    logoImg.src = 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCADcANwDASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlbaWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uLj5OXm5+jp6vLz9PX29/j5+v/aAAwDAQACEQMRAD8A9/ooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKK
