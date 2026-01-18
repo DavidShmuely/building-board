@@ -46,6 +46,7 @@
       gap: 10px;
       margin-bottom: 20px;
       border-bottom: 2px solid #ddd;
+      flex-wrap: wrap;
     }
 
     .tab {
@@ -94,7 +95,8 @@
 
     input[type="text"],
     input[type="number"],
-    textarea {
+    textarea,
+    select {
       width: 100%;
       padding: 12px;
       border: 2px solid #e0e0e0;
@@ -105,7 +107,8 @@
     }
 
     input:focus,
-    textarea:focus {
+    textarea:focus,
+    select:focus {
       outline: none;
       border-color: #667eea;
     }
@@ -113,6 +116,7 @@
     textarea {
       min-height: 100px;
       resize: vertical;
+      font-family: inherit;
     }
 
     .btn {
@@ -141,6 +145,11 @@
       color: white;
     }
 
+    .btn-success:hover {
+      background: #059669;
+      transform: translateY(-2px);
+    }
+
     .btn-danger {
       background: #ef4444;
       color: white;
@@ -154,17 +163,12 @@
       margin-bottom: 20px;
     }
 
-    .notice-list {
-      display: flex;
-      flex-direction: column;
-      gap: 15px;
-    }
-
     .notice-card {
       background: #f8f9fa;
       border: 2px solid #e0e0e0;
       border-radius: 8px;
       padding: 20px;
+      margin-bottom: 15px;
       position: relative;
     }
 
@@ -185,12 +189,21 @@
       gap: 20px;
     }
 
-    .export-section {
-      background: #f0fdf4;
-      border: 2px solid #10b981;
-      padding: 20px;
-      border-radius: 12px;
-      margin-top: 20px;
+    .success-message {
+      background: #10b981;
+      color: white;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      display: none;
+      text-align: center;
+      font-weight: 600;
+    }
+
+    .help-text {
+      font-size: 13px;
+      color: #666;
+      margin-top: 5px;
     }
 
     .code-block {
@@ -205,31 +218,32 @@
       white-space: pre;
     }
 
-    .help-text {
-      font-size: 13px;
-      color: #666;
-      margin-top: 5px;
+    .export-section {
+      background: #f0fdf4;
+      border: 2px solid #10b981;
+      padding: 20px;
+      border-radius: 12px;
+      margin-top: 20px;
     }
 
-    .success-message {
-      background: #10b981;
-      color: white;
-      padding: 15px;
-      border-radius: 8px;
-      margin-bottom: 20px;
-      display: none;
+    .download-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin: 20px 0;
     }
 
-    .icon-picker {
+    .icon-grid {
       display: grid;
       grid-template-columns: repeat(8, 1fr);
       gap: 8px;
       margin-top: 10px;
     }
 
-    .icon-option {
+    .icon-btn {
       padding: 10px;
       background: #f0f0f0;
+      border: 2px solid transparent;
       border-radius: 8px;
       text-align: center;
       font-size: 24px;
@@ -237,14 +251,27 @@
       transition: all 0.2s;
     }
 
-    .icon-option:hover {
+    .icon-btn:hover {
       background: #667eea;
       transform: scale(1.1);
     }
 
-    .icon-option.selected {
+    .icon-btn.selected {
       background: #667eea;
+      border-color: #5568d3;
       box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.3);
+    }
+
+    @media (max-width: 768px) {
+      .grid-2 {
+        grid-template-columns: 1fr;
+      }
+      .tabs {
+        font-size: 14px;
+      }
+      .tab {
+        padding: 10px 16px;
+      }
     }
   </style>
 </head>
@@ -252,23 +279,23 @@
   <div class="container">
     <header>
       <h1>🏢 ממשק ניהול לוח מודעות</h1>
-      <div class="subtitle">בניין תמר - עריכה וניהול מלא של כל התוכן</div>
+      <div class="subtitle">בניין תמר - עריכה וייצוא קבצי JSON</div>
     </header>
 
-    <div class="success-message" id="successMsg">✅ השינויים נשמרו בהצלחה!</div>
+    <div class="success-message" id="successMsg">✅ נשמר בזיכרון! לחץ על "ייצוא קבצים" להורדה</div>
 
     <div class="tabs">
-      <button class="tab active" onclick="showTab('config')">⚙️ הגדרות כלליות</button>
-      <button class="tab" onclick="showTab('central')">📢 הודעות מרכזיות</button>
-      <button class="tab" onclick="showTab('sidebar')">📝 הודעות צדדיות</button>
-      <button class="tab" onclick="showTab('ticker')">📰 טיקר חדשות</button>
-      <button class="tab" onclick="showTab('weather')">🌤️ מזג אוויר</button>
-      <button class="tab" onclick="showTab('zmanim')">🕐 זמני תפילה</button>
-      <button class="tab" onclick="showTab('export')">💾 ייצוא קבצים</button>
+      <button class="tab active" onclick="switchTab('config')">⚙️ הגדרות</button>
+      <button class="tab" onclick="switchTab('central')">📢 הודעות מרכזיות</button>
+      <button class="tab" onclick="switchTab('sidebar')">📝 הודעות צד</button>
+      <button class="tab" onclick="switchTab('ticker')">📰 טיקר</button>
+      <button class="tab" onclick="switchTab('weather')">🌤️ מזג אוויר</button>
+      <button class="tab" onclick="switchTab('zmanim')">🕐 זמנים</button>
+      <button class="tab" onclick="switchTab('export')">💾 ייצוא</button>
     </div>
 
     <!-- Config Tab -->
-    <div class="tab-content active" id="config">
+    <div class="tab-content active" id="tab-config">
       <h2>⚙️ הגדרות כלליות</h2>
       <div class="form-group">
         <label>שם הבניין</label>
@@ -302,52 +329,30 @@
       <button class="btn btn-primary" onclick="saveConfig()">💾 שמור הגדרות</button>
     </div>
 
-    <!-- Central Notices Tab -->
-    <div class="tab-content" id="central">
+    <!-- Central Tab -->
+    <div class="tab-content" id="tab-central">
       <h2>📢 הודעות מרכזיות</h2>
-      <button class="btn btn-add" onclick="addCentralNotice()">➕ הוסף הודעה</button>
+      <button class="btn btn-add" onclick="addCentralNotice()">➕ הוסף הודעה חדשה</button>
       <div id="centralList"></div>
     </div>
 
     <!-- Sidebar Tab -->
-    <div class="tab-content" id="sidebar">
+    <div class="tab-content" id="tab-sidebar">
       <h2>📝 הודעות צדדיות</h2>
-      <button class="btn btn-add" onclick="addSidebarNotice()">➕ הוסף הודעה</button>
+      <button class="btn btn-add" onclick="addSidebarNotice()">➕ הוסף הודעה חדשה</button>
       <div id="sidebarList"></div>
-      
-      <div style="margin-top: 20px;">
-        <h3>בחר אייקון</h3>
-        <div class="icon-picker">
-          <div class="icon-option">🕐</div>
-          <div class="icon-option">📬</div>
-          <div class="icon-option">💰</div>
-          <div class="icon-option">☎️</div>
-          <div class="icon-option">🔧</div>
-          <div class="icon-option">🚗</div>
-          <div class="icon-option">🏊</div>
-          <div class="icon-option">🎾</div>
-          <div class="icon-option">📅</div>
-          <div class="icon-option">🔒</div>
-          <div class="icon-option">🚪</div>
-          <div class="icon-option">💡</div>
-          <div class="icon-option">🚮</div>
-          <div class="icon-option">♻️</div>
-          <div class="icon-option">⚠️</div>
-          <div class="icon-option">ℹ️</div>
-        </div>
-      </div>
     </div>
 
     <!-- Ticker Tab -->
-    <div class="tab-content" id="ticker">
+    <div class="tab-content" id="tab-ticker">
       <h2>📰 הודעות טיקר</h2>
-      <button class="btn btn-add" onclick="addTickerMsg()">➕ הוסף הודעה</button>
+      <button class="btn btn-add" onclick="addTickerMessage()">➕ הוסף הודעה חדשה</button>
       <div id="tickerList"></div>
     </div>
 
     <!-- Weather Tab -->
-    <div class="tab-content" id="weather">
-      <h2>🌤️ מזג אוויר (עריכה ידנית)</h2>
+    <div class="tab-content" id="tab-weather">
+      <h2>🌤️ מזג אוויר</h2>
       <h3>מזג אוויר נוכחי</h3>
       <div class="grid-2">
         <div class="form-group">
@@ -360,15 +365,24 @@
         </div>
       </div>
       <div class="form-group">
-        <label>אייקון (אמוג'י)</label>
-        <input type="text" id="weatherIcon" value="☀️">
+        <label>אייקון</label>
+        <select id="weatherIcon">
+          <option value="☀️">☀️ בהיר</option>
+          <option value="⛅">⛅ מעונן חלקית</option>
+          <option value="☁️">☁️ מעונן</option>
+          <option value="🌤️">🌤️ שמש וענן</option>
+          <option value="🌧️">🌧️ גשם</option>
+          <option value="⛈️">⛈️ סופת רעמים</option>
+          <option value="🌦️">🌦️ גשם קל</option>
+          <option value="🌨️">🌨️ שלג</option>
+        </select>
       </div>
       <button class="btn btn-primary" onclick="saveWeather()">💾 שמור מזג אוויר</button>
     </div>
 
     <!-- Zmanim Tab -->
-    <div class="tab-content" id="zmanim">
-      <h2>🕐 זמני תפילה (עריכה ידנית)</h2>
+    <div class="tab-content" id="tab-zmanim">
+      <h2>🕐 זמני תפילה</h2>
       <p class="help-text">השאר ריק לחישוב אוטומטי לפי מיקום</p>
       <div class="grid-2">
         <div class="form-group">
@@ -400,24 +414,35 @@
     </div>
 
     <!-- Export Tab -->
-    <div class="tab-content" id="export">
+    <div class="tab-content" id="tab-export">
       <h2>💾 ייצוא קבצי JSON</h2>
-      <p>לחץ על הכפתורים כדי להוריד את קבצי ה-JSON המעודכנים</p>
+      <p>לחץ על הכפתורים להורדת הקבצים המעודכנים</p>
       
-      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin: 20px 0;">
-        <button class="btn btn-success" onclick="downloadJSON('config')">📥 config.json</button>
-        <button class="btn btn-success" onclick="downloadJSON('central')">📥 central.json</button>
-        <button class="btn btn-success" onclick="downloadJSON('sidebar')">📥 sidebar.json</button>
-        <button class="btn btn-success" onclick="downloadJSON('ticker')">📥 ticker.json</button>
-        <button class="btn btn-success" onclick="downloadJSON('weather')">📥 weather.json</button>
-        <button class="btn btn-success" onclick="downloadJSON('zmanim')">📥 zmanim.json</button>
+      <div class="download-grid">
+        <button class="btn btn-success" onclick="downloadFile('config')">📥 config.json</button>
+        <button class="btn btn-success" onclick="downloadFile('central')">📥 central.json</button>
+        <button class="btn btn-success" onclick="downloadFile('sidebar')">📥 sidebar.json</button>
+        <button class="btn btn-success" onclick="downloadFile('ticker')">📥 ticker.json</button>
+        <button class="btn btn-success" onclick="downloadFile('weather')">📥 weather.json</button>
+        <button class="btn btn-success" onclick="downloadFile('zmanim')">📥 zmanim.json</button>
       </div>
 
       <div class="export-section">
-        <h3>📁 מבנה תיקיות מומלץ</h3>
+        <h3>📋 הוראות שימוש</h3>
+        <ol style="margin-right: 20px; line-height: 2;">
+          <li>ערוך את כל הנתונים בטאבים השונים</li>
+          <li>לחץ "שמור" בכל טאב</li>
+          <li>בוא לטאב "ייצוא"</li>
+          <li>הורד את כל 6 הקבצים</li>
+          <li>העלה אותם לשרת שלך במבנה הנכון</li>
+        </ol>
+      </div>
+
+      <div class="export-section" style="margin-top: 20px;">
+        <h3>📁 מבנה תיקיות</h3>
         <div class="code-block">building-board/
 ├── index.html
-├── admin.html (הדף הזה)
+├── admin.html
 ├── config.json
 └── data/
     ├── central.json
@@ -426,47 +451,51 @@
     ├── weather.json
     └── zmanim.json</div>
       </div>
-
-      <div class="export-section" style="margin-top: 20px;">
-        <h3>🚀 הוראות העלאה</h3>
-        <ol style="margin-right: 20px; line-height: 2;">
-          <li>הורד את כל קבצי ה-JSON דרך הכפתורים למעלה</li>
-          <li>צור תיקייה בשם <code>data</code></li>
-          <li>העבר את הקבצים לתיקייה המתאימה</li>
-          <li>העלה הכל לשרת (GitHub Pages / Netlify)</li>
-          <li>פתח את index.html בדפדפן - הכל יעבוד!</li>
-        </ol>
-      </div>
     </div>
   </div>
 
   <script>
     // Data storage
-    let data = {
+    let DATA = {
       config: {
         buildingName: 'בניין תמר',
         location: { lat: 32.0853, lng: 34.7818 },
         hebrewYear: 'התשפ״ו',
         intervals: { centralNotice: 8000, ticker: 30000 }
       },
-      central: [],
-      sidebar: [],
-      ticker: [],
-      weather: { current: { temp: 22, description: 'בהיר', icon: '☀️' }, forecast: [] },
+      central: [
+        { title: '♻️ מה שייכים לפח הכתום?', content: 'אריזות ריקות בלבד:<br>• אריזות מזון 🥫<br>• אריזות משקה 🧃', image: null },
+        { title: '⚠️ תחזוקה מתוכננת', content: 'יום ראשון 20.1.2026<br>שעות 08:00-12:00', image: null }
+      ],
+      sidebar: [
+        { icon: '🕐', title: 'שעות פעילות מעלית', text: '24/7' },
+        { icon: '📬', title: 'איסוף דואר', text: 'א׳-ה׳ 08:00-17:00' }
+      ],
+      ticker: [
+        'שמירה על הניקיון במרחבים המשותפים - תודה רבה! 🧹',
+        'אנא לנעול את דלת הכניסה אחריכם 🔒'
+      ],
+      weather: {
+        current: { temp: 22, description: 'בהיר', icon: '☀️' },
+        forecast: [
+          { day: 'יום א׳', icon: '☀️', temp: 24 },
+          { day: 'יום ב׳', icon: '⛅', temp: 23 }
+        ]
+      },
       zmanim: {}
     };
 
-    // Tab switching
-    function showTab(tabName) {
+    // Switch tabs
+    function switchTab(tabName) {
       document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
       document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
       event.target.classList.add('active');
-      document.getElementById(tabName).classList.add('active');
+      document.getElementById('tab-' + tabName).classList.add('active');
     }
 
-    // Save functions
+    // Save config
     function saveConfig() {
-      data.config = {
+      DATA.config = {
         buildingName: document.getElementById('buildingName').value,
         location: {
           lat: parseFloat(document.getElementById('lat').value),
@@ -481,35 +510,168 @@
       showSuccess();
     }
 
-    function showSuccess() {
-      const msg = document.getElementById('successMsg');
-      msg.style.display = 'block';
-      setTimeout(() => { msg.style.display = 'none'; }, 3000);
+    // Central notices
+    function renderCentral() {
+      const html = DATA.central.map((n, i) => `
+        <div class="notice-card">
+          <h3>הודעה ${i + 1}</h3>
+          <div class="form-group">
+            <label>כותרת</label>
+            <input type="text" value="${n.title}" onchange="DATA.central[${i}].title=this.value">
+          </div>
+          <div class="form-group">
+            <label>תוכן (השתמש ב-&lt;br&gt; לשורה חדשה)</label>
+            <textarea onchange="DATA.central[${i}].content=this.value">${n.content}</textarea>
+          </div>
+          <div class="notice-actions">
+            <button class="btn btn-danger" onclick="deleteCentral(${i})">🗑️ מחק</button>
+          </div>
+        </div>
+      `).join('');
+      document.getElementById('centralList').innerHTML = html;
     }
 
-    // Download JSON
-    function downloadJSON(type) {
+    function addCentralNotice() {
+      DATA.central.push({ title: 'כותרת חדשה', content: 'תוכן חדש', image: null });
+      renderCentral();
+      showSuccess();
+    }
+
+    function deleteCentral(i) {
+      if (confirm('למחוק הודעה זו?')) {
+        DATA.central.splice(i, 1);
+        renderCentral();
+        showSuccess();
+      }
+    }
+
+    // Sidebar notices
+    function renderSidebar() {
+      const html = DATA.sidebar.map((n, i) => `
+        <div class="notice-card">
+          <h3>הודעה ${i + 1}</h3>
+          <div class="form-group">
+            <label>אייקון</label>
+            <input type="text" value="${n.icon}" onchange="DATA.sidebar[${i}].icon=this.value" maxlength="2">
+          </div>
+          <div class="form-group">
+            <label>כותרת</label>
+            <input type="text" value="${n.title}" onchange="DATA.sidebar[${i}].title=this.value">
+          </div>
+          <div class="form-group">
+            <label>טקסט</label>
+            <input type="text" value="${n.text}" onchange="DATA.sidebar[${i}].text=this.value">
+          </div>
+          <div class="notice-actions">
+            <button class="btn btn-danger" onclick="deleteSidebar(${i})">🗑️ מחק</button>
+          </div>
+        </div>
+      `).join('');
+      document.getElementById('sidebarList').innerHTML = html;
+    }
+
+    function addSidebarNotice() {
+      DATA.sidebar.push({ icon: '📌', title: 'כותרת חדשה', text: 'טקסט חדש' });
+      renderSidebar();
+      showSuccess();
+    }
+
+    function deleteSidebar(i) {
+      if (confirm('למחוק הודעה זו?')) {
+        DATA.sidebar.splice(i, 1);
+        renderSidebar();
+        showSuccess();
+      }
+    }
+
+    // Ticker
+    function renderTicker() {
+      const html = DATA.ticker.map((msg, i) => `
+        <div class="notice-card">
+          <div class="form-group">
+            <label>הודעה ${i + 1}</label>
+            <input type="text" value="${msg}" onchange="DATA.ticker[${i}]=this.value">
+          </div>
+          <button class="btn btn-danger" onclick="deleteTicker(${i})">🗑️ מחק</button>
+        </div>
+      `).join('');
+      document.getElementById('tickerList').innerHTML = html;
+    }
+
+    function addTickerMessage() {
+      DATA.ticker.push('הודעה חדשה');
+      renderTicker();
+      showSuccess();
+    }
+
+    function deleteTicker(i) {
+      if (confirm('למחוק הודעה זו?')) {
+        DATA.ticker.splice(i, 1);
+        renderTicker();
+        showSuccess();
+      }
+    }
+
+    // Weather
+    function saveWeather() {
+      DATA.weather.current = {
+        temp: parseInt(document.getElementById('weatherTemp').value),
+        description: document.getElementById('weatherDesc').value,
+        icon: document.getElementById('weatherIcon').value
+      };
+      showSuccess();
+    }
+
+    // Zmanim
+    function saveZmanim() {
+      const alot = document.getElementById('zmanAlot').value;
+      const sunrise = document.getElementById('zmanSunrise').value;
+      const shema = document.getElementById('zmanShema').value;
+      const chatzot = document.getElementById('zmanChatzot').value;
+      const sunset = document.getElementById('zmanSunset').value;
+      const tzait = document.getElementById('zmanTzait').value;
+
+      DATA.zmanim = {};
+      if (alot) DATA.zmanim.alot = alot;
+      if (sunrise) DATA.zmanim.sunrise = sunrise;
+      if (shema) DATA.zmanim.shema = shema;
+      if (chatzot) DATA.zmanim.chatzot = chatzot;
+      if (sunset) DATA.zmanim.sunset = sunset;
+      if (tzait) DATA.zmanim.tzait = tzait;
+
+      showSuccess();
+    }
+
+    // Download file
+    function downloadFile(type) {
       let jsonData = {};
-      
+      let filename = '';
+
       switch(type) {
         case 'config':
           saveConfig();
-          jsonData = data.config;
+          jsonData = DATA.config;
+          filename = 'config.json';
           break;
         case 'central':
-          jsonData = data.central;
+          jsonData = DATA.central;
+          filename = 'central.json';
           break;
         case 'sidebar':
-          jsonData = data.sidebar;
+          jsonData = DATA.sidebar;
+          filename = 'sidebar.json';
           break;
         case 'ticker':
-          jsonData = data.ticker;
+          jsonData = DATA.ticker;
+          filename = 'ticker.json';
           break;
         case 'weather':
-          jsonData = data.weather;
+          jsonData = DATA.weather;
+          filename = 'weather.json';
           break;
         case 'zmanim':
-          jsonData = data.zmanim;
+          jsonData = DATA.zmanim;
+          filename = 'zmanim.json';
           break;
       }
 
@@ -518,28 +680,27 @@
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `${type}.json`;
+      a.download = filename;
+      document.body.appendChild(a);
       a.click();
+      document.body.removeChild(a);
       URL.revokeObjectURL(url);
+      
+      showSuccess('✅ הקובץ ' + filename + ' הורד בהצלחה!');
     }
 
-    // Initialize with demo data
-    data.central = [
-      { title: '♻️ מה שייכים לפח הכתום?', content: 'אריזות ריקות בלבד', image: null },
-      { title: '⚠️ תחזוקה מתוכננת', content: 'יום ראשון 20.1.2026', image: null }
-    ];
+    // Show success message
+    function showSuccess(msg = '✅ נשמר! לחץ על "ייצוא קבצים" להורדה') {
+      const el = document.getElementById('successMsg');
+      el.textContent = msg;
+      el.style.display = 'block';
+      setTimeout(() => { el.style.display = 'none'; }, 3000);
+    }
 
-    data.sidebar = [
-      { icon: '🕐', title: 'שעות פעילות מעלית', text: '24/7' },
-      { icon: '📬', title: 'איסוף דואר', text: 'א׳-ה׳ 08:00-17:00' }
-    ];
-
-    data.ticker = [
-      'שמירה על הניקיון במרחבים המשותפים',
-      'אנא לנעול את דלת הכניסה אחריכם'
-    ];
-
-    console.log('✅ ממשק הניהול מוכן! ערוך את הנתונים והורד את קבצי ה-JSON');
+    // Init
+    renderCentral();
+    renderSidebar();
+    renderTicker();
   </script>
 </body>
 </html>
