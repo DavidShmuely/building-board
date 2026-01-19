@@ -328,6 +328,25 @@
       0% { transform: translateX(100%); }
       100% { transform: translateX(-100%); }
     }
+
+    /* Loading */
+    .loading {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      font-size: 24px;
+      color: white;
+    }
+
+    .error {
+      background: #ef4444;
+      color: white;
+      padding: 20px;
+      border-radius: 12px;
+      text-align: center;
+      margin: 20px;
+    }
   </style>
 </head>
 <body>
@@ -345,18 +364,12 @@
         <div class="time" id="time">00:00:00</div>
         <div class="dates">
           <span id="dateGregorian">טוען...</span>
-          <span class="date-hebrew" id="hebrewYear">התשפ״ו</span>
+          <span class="date-hebrew" id="hebrewYear">טוען...</span>
         </div>
       </div>
 
       <div class="weather-widget" id="weatherWidget">
-        <div class="weather-current">
-          <div class="weather-icon">☀️</div>
-          <div>
-            <div class="weather-temp">--°</div>
-            <div class="weather-desc">טוען...</div>
-          </div>
-        </div>
+        <div class="loading">טוען...</div>
       </div>
     </div>
 
@@ -393,7 +406,7 @@
 
         <!-- Central Notice -->
         <div class="card central-notice" id="centralNotice">
-          <div class="notice-title">טוען הודעות...</div>
+          <div class="loading">טוען הודעות...</div>
         </div>
       </div>
 
@@ -405,7 +418,7 @@
             <span>הודעות לדיירים</span>
           </div>
           <div class="notice-list" id="sideNotices">
-            <div>טוען...</div>
+            <div class="loading">טוען...</div>
           </div>
         </div>
       </div>
@@ -419,109 +432,128 @@
   </div>
 
   <script>
-    // Global config
+    // ============= CONFIG - הדבק כאן את ה-URL מ-Google Apps Script =============
+    const GOOGLE_SHEET_URL = https://myaccount.google.com/info/supervisedsignedout?continue=https%3A%2F%2Fscript.googleusercontent.com%2Fmacros%2Fecho%3Fuser_content_key%3DAehSKLip83YqkyOqZKhbgKWmu_7lCitWAzhmNylhW-JKyflQO5x8Xj2SAedUakqqWFD23qVzRCvZFdpNigjlxSzU9GsZBegTNU-FeIcRkjmGY5xaEBxwPIkv9D8BnPrTeAxFTUnOxRGKYirbNg6k9oRzsQ7UYdhMNl6RKk1tCBFSjuMI-KsN2ecrMOBTqpHTGleiRHheVzhH5WxuJxUH1z3EVa0UrXXWGxc3dCvhgh8cR5Hfu5X_pyhaplHnyCh1pIyUtTvWlHPPIo2fqluTJha7gDircAoG43EuHloO-c8W%26lib%3DM6gGBj3L82yCXYkeTtlcafXjQiBtTwFOb;
+    
+    // ============= GLOBAL VARIABLES =============
     let CONFIG = {};
     let centralNotices = [];
     let sidebarNotices = [];
     let tickerMessages = [];
     let weatherData = null;
-    let zmanimData = null;
     let noticeIndex = 0;
 
-    // Load JSON with fallback to inline data
-    async function loadJSON(url, fallback) {
+    // ============= LOAD DATA FROM GOOGLE SHEETS =============
+    async function loadDataFromSheets() {
       try {
-        const response = await fetch(url);
-        if (!response.ok) throw new Error('File not found');
-        return await response.json();
+        console.log('Loading data from Google Sheets...');
+        
+        // Check if URL is configured
+        if (!GOOGLE_SHEET_URL || GOOGLE_SHEET_URL.includes('הדבק_כאן')) {
+          throw new Error('אנא הדבק את ה-URL של Google Apps Script בשורה 364');
+        }
+        
+        const response = await fetch(GOOGLE_SHEET_URL);
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        
+        if (data.error) {
+          throw new Error(data.error);
+        }
+        
+        // Load all data
+        CONFIG = data.config || {};
+        centralNotices = data.central || [];
+        sidebarNotices = data.sidebar || [];
+        tickerMessages = data.ticker || [];
+        weatherData = data.weather || null;
+        
+        console.log('Data loaded successfully:', data);
+        
+        // Apply data to UI
+        applyData();
+        
       } catch (error) {
-        console.log(`Using fallback data for ${url}`);
-        return fallback;
+        console.error('Error loading data:', error);
+        showError('שגיאה בטעינת נתונים: ' + error.message);
+        
+        // Fallback to demo data
+        loadDemoData();
       }
     }
 
-    // Initialize all data
-    async function initData() {
-      // Load config
-      CONFIG = await loadJSON('config.json', {
-        buildingName: 'בניין תמר',
-        location: { lat: 32.0853, lng: 34.7818, city: 'תל אביב-יפו' },
+    // ============= FALLBACK DEMO DATA =============
+    function loadDemoData() {
+      console.log('Loading demo data...');
+      
+      CONFIG = {
+        buildingName: 'בניין תמר (מצב הדגמה)',
         hebrewYear: 'התשפ״ו',
+        location: { lat: 32.0853, lng: 34.7818 },
         intervals: { centralNotice: 8000, ticker: 30000 },
         logo: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="200" height="200"%3E%3Crect fill="%23f4e4c1" width="200" height="200"/%3E%3Ctext x="100" y="100" text-anchor="middle" dominant-baseline="middle" font-size="60" fill="%23d4924e"%3E🏢%3C/text%3E%3C/svg%3E'
-      });
-
-      // Load central notices
-      centralNotices = await loadJSON('data/central.json', [
-        {
-          title: '♻️ מה שייכים לפח הכתום?',
-          content: 'אריזות ריקות בלבד:<br>• אריזות מזון 🥫<br>• אריזות משקה 🧃<br>• אריזות שקשוק 🧴',
-          image: null
-        },
-        {
-          title: '⚠️ תחזוקה מתוכננת',
-          content: 'יום ראשון 20.1.2026<br>שעות 08:00-12:00<br>הפסקת מים במדרגה ב׳',
-          image: null
-        },
-        {
-          title: '🕯️ שבת שלום',
-          content: 'כניסת שבת: 17:23<br>יציאת שבת: 18:35<br>פרשת השבוע: וארא',
-          image: null
-        }
-      ]);
-
-      // Load sidebar notices
-      sidebarNotices = await loadJSON('data/sidebar.json', [
+      };
+      
+      centralNotices = [
+        { title: '♻️ מה שייכים לפח הכתום?', content: 'אריזות ריקות בלבד', image: null },
+        { title: '⚠️ תחזוקה מתוכננת', content: 'יום ראשון 08:00-12:00', image: null }
+      ];
+      
+      sidebarNotices = [
         { icon: '🕐', title: 'שעות פעילות מעלית', text: '24/7' },
-        { icon: '📬', title: 'איסוף דואר', text: 'א׳-ה׳ 08:00-17:00' },
-        { icon: '💰', title: 'גביית ארנונה', text: 'עד ה-10 לחודש' },
-        { icon: '☎️', title: 'מספר חירום', text: 'שומר: 050-1234567' },
-        { icon: '🔧', title: 'תחזוקה', text: 'יצחק: 052-9876543' }
-      ]);
-
-      // Load ticker messages
-      tickerMessages = await loadJSON('data/ticker.json', [
-        'שמירה על הניקיון במרחבים המשותפים - תודה רבה! 🧹',
-        'אנא לנעול את דלת הכניסה אחריכם 🔒',
-        'בכל בעיה ניתן לפנות למוקד השירות: 03-1234567 📞',
-        'תזכורת: תשלום ועד בית עד ה-5 לחודש 💳',
-        'חניה במקומות המיועדים בלבד 🚗'
-      ]);
-
-      // Load weather
-      weatherData = await loadJSON('data/weather.json', {
+        { icon: '📬', title: 'איסוף דואר', text: 'א׳-ה׳ 08:00-17:00' }
+      ];
+      
+      tickerMessages = [
+        'שמירה על הניקיון במרחבים המשותפים',
+        'אנא לנעול את דלת הכניסה אחריכם'
+      ];
+      
+      weatherData = {
         current: { temp: 22, description: 'בהיר', icon: '☀️' },
         forecast: [
           { day: 'יום א׳', icon: '☀️', temp: 24 },
-          { day: 'יום ב׳', icon: '⛅', temp: 23 },
-          { day: 'יום ג׳', icon: '🌤️', temp: 21 },
-          { day: 'יום ד׳', icon: '☀️', temp: 25 }
+          { day: 'יום ב׳', icon: '⛅', temp: 23 }
         ]
-      });
+      };
+      
+      applyData();
+    }
 
-      // Load zmanim (optional - will calculate if not provided)
-      zmanimData = await loadJSON('data/zmanim.json', null);
-
-      // Apply config
-      document.getElementById('buildingName').textContent = CONFIG.buildingName;
-      document.getElementById('hebrewYear').textContent = CONFIG.hebrewYear;
-      document.getElementById('buildingLogo').src = CONFIG.logo;
-
-      // Display data
-      displayWeather();
-      displaySidebar();
-      displayTicker();
-      if (zmanimData) {
-        displayZmanim();
-      } else {
-        calculateZmanim();
+    // ============= APPLY DATA TO UI =============
+    function applyData() {
+      // Header
+      document.getElementById('buildingName').textContent = CONFIG.buildingName || 'בניין תמר';
+      document.getElementById('hebrewYear').textContent = CONFIG.hebrewYear || 'התשפ״ו';
+      document.getElementById('buildingLogo').src = CONFIG.logo || '';
+      
+      // Weather
+      if (weatherData) {
+        displayWeather();
       }
+      
+      // Sidebar
+      displaySidebar();
+      
+      // Ticker
+      displayTicker();
+      
+      // Zmanim
+      calculateZmanim();
+      
+      // Start rotation
       rotateNotice();
     }
 
-    // Display functions
+    // ============= DISPLAY FUNCTIONS =============
     function displayWeather() {
-      const html = `
+      if (!weatherData || !weatherData.current) return;
+      
+      let html = `
         <div class="weather-current">
           <div class="weather-icon">${weatherData.current.icon}</div>
           <div>
@@ -529,16 +561,22 @@
             <div class="weather-desc">${weatherData.current.description}</div>
           </div>
         </div>
-        <div class="weather-forecast">
-          ${weatherData.forecast.map(day => `
+      `;
+      
+      if (weatherData.forecast && weatherData.forecast.length > 0) {
+        html += '<div class="weather-forecast">';
+        weatherData.forecast.forEach(day => {
+          html += `
             <div class="forecast-item">
               <div class="forecast-day">${day.day}</div>
               <div class="forecast-icon">${day.icon}</div>
               <div class="forecast-temp">${day.temp}°</div>
             </div>
-          `).join('')}
-        </div>
-      `;
+          `;
+        });
+        html += '</div>';
+      }
+      
       document.getElementById('weatherWidget').innerHTML = html;
     }
 
@@ -552,6 +590,7 @@
           <div class="notice-item-text">${n.text}</div>
         </div>
       `).join('');
+      
       document.getElementById('sideNotices').innerHTML = html;
     }
 
@@ -560,40 +599,41 @@
       document.getElementById('ticker').textContent = text + ' • ' + text;
     }
 
-    function displayZmanim() {
-      document.getElementById('alot').textContent = zmanimData.alot;
-      document.getElementById('sunrise').textContent = zmanimData.sunrise;
-      document.getElementById('shema').textContent = zmanimData.shema;
-      document.getElementById('chatzot').textContent = zmanimData.chatzot;
-      document.getElementById('sunset').textContent = zmanimData.sunset;
-      document.getElementById('tzait').textContent = zmanimData.tzait;
-    }
-
     function rotateNotice() {
+      if (centralNotices.length === 0) return;
+      
       const el = document.getElementById('centralNotice');
       el.style.opacity = '0';
       
       setTimeout(() => {
         const notice = centralNotices[noticeIndex];
         let html = '';
+        
         if (notice.image) {
           html += `<img src="${notice.image}" class="notice-image" alt="${notice.title}">`;
         }
+        
         html += `
           <div class="notice-title">${notice.title}</div>
           <div class="notice-content">${notice.content}</div>
         `;
+        
         el.innerHTML = html;
         el.style.opacity = '1';
+        
         noticeIndex = (noticeIndex + 1) % centralNotices.length;
       }, 500);
+      
+      const interval = CONFIG.intervals?.centralNotice || 8000;
+      setTimeout(rotateNotice, interval);
     }
 
-    // Calculate zmanim if not provided
+    // ============= ZMANIM CALCULATION =============
     function calculateZmanim() {
       const now = new Date();
-      const lat = CONFIG.location.lat;
-      const lng = CONFIG.location.lng;
+      const lat = CONFIG.location?.lat || 32.0853;
+      const lng = CONFIG.location?.lng || 34.7818;
+      
       const rad = Math.PI / 180;
       const dayOfYear = Math.floor((now - new Date(now.getFullYear(), 0, 0)) / 86400000);
       const dec = 23.45 * Math.sin(rad * (360 / 365) * (dayOfYear - 81));
@@ -616,22 +656,53 @@
       document.getElementById('tzait').textContent = fmt(sunset + 0.75);
     }
 
-    // Clock
+    // ============= CLOCK =============
     function updateClock() {
       const now = new Date();
+      
       document.getElementById('time').textContent = now.toLocaleTimeString('he-IL', { 
-        hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false 
+        hour: '2-digit', 
+        minute: '2-digit', 
+        second: '2-digit',
+        hour12: false 
       });
+      
       document.getElementById('dateGregorian').textContent = now.toLocaleDateString('he-IL', { 
-        weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' 
+        weekday: 'long', 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric' 
       });
     }
 
-    // Init
-    initData();
+    // ============= ERROR DISPLAY =============
+    function showError(message) {
+      document.body.innerHTML = `
+        <div class="error">
+          <h2>⚠️ שגיאה</h2>
+          <p>${message}</p>
+          <p style="margin-top: 20px; font-size: 14px;">
+            בדוק שהדבקת את ה-URL הנכון מ-Google Apps Script<br>
+            והרשאות מוגדרות ל-"Anyone"
+          </p>
+        </div>
+      `;
+    }
+
+    // ============= INITIALIZATION =============
+    console.log('Initializing board...');
+    
+    // Start clock
     updateClock();
     setInterval(updateClock, 1000);
-    setInterval(() => rotateNotice(), CONFIG.intervals?.centralNotice || 8000);
+    
+    // Load data from Google Sheets
+    loadDataFromSheets();
+    
+    // Reload data every 5 minutes to get updates
+    setInterval(loadDataFromSheets, 300000);
+    
+    console.log('Board initialized');
   </script>
 </body>
 </html>
