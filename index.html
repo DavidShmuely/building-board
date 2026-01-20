@@ -591,29 +591,63 @@
     // ============= ZMANIM CALCULATION =============
     function calculateZmanim() {
       const now = new Date();
-      const lat = CONFIG.location?.lat || 32.0853;
-      const lng = CONFIG.location?.lng || 34.7818;
+      const lat = CONFIG.location?.lat || 32.089157; // פתח תקווה
+      const lng = CONFIG.location?.lng || 34.887835;
       
       const rad = Math.PI / 180;
-      const dayOfYear = Math.floor((now - new Date(now.getFullYear(), 0, 0)) / 86400000);
-      const dec = 23.45 * Math.sin(rad * (360 / 365) * (dayOfYear - 81));
-      const hourAngle = Math.acos(-Math.tan(rad * lat) * Math.tan(rad * dec)) / rad;
+      
+      // Calculate day of year
+      const start = new Date(now.getFullYear(), 0, 0);
+      const diff = now - start;
+      const oneDay = 1000 * 60 * 60 * 24;
+      const dayOfYear = Math.floor(diff / oneDay);
+      
+      // Solar declination
+      const declination = 23.45 * Math.sin(rad * (360 / 365.25) * (dayOfYear - 81));
+      
+      // Hour angle for sunrise/sunset
+      const cosH = (Math.sin(-0.833 * rad) - Math.sin(lat * rad) * Math.sin(declination * rad)) / 
+                   (Math.cos(lat * rad) * Math.cos(declination * rad));
+      
+      if (cosH > 1 || cosH < -1) {
+        console.warn('No sunrise/sunset today');
+        return;
+      }
+      
+      const hourAngle = Math.acos(cosH) / rad;
+      
+      // Solar noon (adjusted for longitude and equation of time)
       const noon = 12 - lng / 15;
+      
+      // Sunrise and sunset
       const sunrise = noon - hourAngle / 15;
       const sunset = noon + hourAngle / 15;
       
+      // Format time
       const fmt = h => {
-        const hrs = Math.floor(h);
-        const mins = Math.floor((h - hrs) * 60);
-        return `${String(hrs).padStart(2, '0')}:${String(mins).padStart(2, '0')}`;
+        let hours = Math.floor(h);
+        let mins = Math.floor((h - hours) * 60);
+        
+        // Handle overflow
+        if (mins >= 60) {
+          hours += 1;
+          mins = 0;
+        }
+        if (hours >= 24) hours -= 24;
+        if (hours < 0) hours += 24;
+        
+        return `${String(hours).padStart(2, '0')}:${String(mins).padStart(2, '0')}`;
       };
       
-      document.getElementById('alot').textContent = fmt(sunrise - 1.2);
+      // Calculate all zmanim
+      document.getElementById('alot').textContent = fmt(sunrise - 1.2); // 72 minutes before
       document.getElementById('sunrise').textContent = fmt(sunrise);
-      document.getElementById('shema').textContent = fmt(sunrise + 3);
+      document.getElementById('shema').textContent = fmt(sunrise + 3); // 3 hours after sunrise
       document.getElementById('chatzot').textContent = fmt(noon);
       document.getElementById('sunset').textContent = fmt(sunset);
-      document.getElementById('tzait').textContent = fmt(sunset + 0.75);
+      document.getElementById('tzait').textContent = fmt(sunset + 0.75); // 45 minutes after
+      
+      console.log('✅ Zmanim calculated for:', {lat, lng, date: now.toLocaleDateString('he-IL')});
     }
 
     // ============= CLOCK =============
@@ -661,6 +695,15 @@
     
     // Reload data every 5 minutes to get updates from Google Sheets
     setInterval(loadDataFromSheets, 300000);
+    
+    // Update zmanim daily at midnight
+    const now = new Date();
+    const msUntilMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 0, 0, 0) - now;
+    setTimeout(() => {
+      calculateZmanim();
+      // Then update every 24 hours
+      setInterval(calculateZmanim, 86400000);
+    }, msUntilMidnight);
     
     console.log('✅ Board initialized');
   </script>
