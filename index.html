@@ -437,7 +437,7 @@
     
     // ============= API KEYS =============
     // הדבק כאן את ה-API Key שלך מ-OpenWeatherMap
-    const OPENWEATHER_API_KEY = 'd6c0e81f9f6033ab44966be36d3d865f'; // Get from: https://openweathermap.org/api
+    const OPENWEATHER_API_KEY = 'הדבק_כאן_API_KEY'; // Get from: https://openweathermap.org/api
     
     // ============= GLOBAL VARIABLES =============
     let CONFIG = {};
@@ -473,6 +473,12 @@
         tickerMessages = data.ticker || [];
         weatherData = data.weather || null;
         
+        // If zmanim is provided from Google Sheets, use it
+        if (data.zmanim) {
+          console.log('✅ Using zmanim from Google Sheets');
+          displayZmanimFromData(data.zmanim);
+        }
+        
         // Apply data to UI
         applyData();
         
@@ -480,6 +486,16 @@
         console.error('❌ Error loading data:', error);
         showError('שגיאה בטעינת נתונים מ-Google Sheets: ' + error.message);
       }
+    }
+    
+    // Display zmanim from Google Sheets data
+    function displayZmanimFromData(zmanim) {
+      document.getElementById('alot').textContent = zmanim.alot || '--:--';
+      document.getElementById('sunrise').textContent = zmanim.sunrise || '--:--';
+      document.getElementById('shema').textContent = zmanim.shema || '--:--';
+      document.getElementById('chatzot').textContent = zmanim.chatzot || '--:--';
+      document.getElementById('sunset').textContent = zmanim.sunset || '--:--';
+      document.getElementById('tzait').textContent = zmanim.tzait || '--:--';
     }
 
     // ============= APPLY DATA TO UI =============
@@ -506,41 +522,116 @@
       console.log('✅ UI updated successfully');
     }
 
-    // ============= FETCH ZMANIM FROM HEBCAL API =============
+    // ============= FETCH ZMANIM - FIXED VERSION =============
     async function fetchZmanimFromAPI() {
       try {
         const lat = CONFIG.location?.lat || 32.089157;
         const lng = CONFIG.location?.lng || 34.887835;
         
+        // Using hebcal API with correct parsing
         const url = `https://www.hebcal.com/zmanim?cfg=json&latitude=${lat}&longitude=${lng}&tzid=Asia/Jerusalem`;
         
         console.log('🕐 Fetching zmanim from hebcal.com...');
+        
         const response = await fetch(url);
         const data = await response.json();
         
-        console.log('✅ Zmanim received:', data);
+        console.log('✅ Zmanim raw data:', data);
         
-        // Extract times
-        const times = data.times;
+        // The API returns times in ISO format like "2026-01-21T05:32:00+02:00"
+        // We need to extract ONLY the time part (HH:MM)
         
-        // Format time from "HH:MM:SS" to "HH:MM"
-        const fmt = (timeStr) => {
-          if (!timeStr) return '--:--';
-          return timeStr.substring(0, 5); // Take only HH:MM
+        const extractTime = (isoString) => {
+          if (!isoString) return '--:--';
+          
+          // Parse the ISO string to Date object
+          const date = new Date(isoString);
+          
+          // Format to HH:MM in local timezone
+          return date.toLocaleTimeString('he-IL', { 
+            hour: '2-digit', 
+            minute: '2-digit',
+            hour12: false,
+            timeZone: 'Asia/Jerusalem'
+          });
         };
         
-        document.getElementById('alot').textContent = fmt(times.alotHaShachar);
-        document.getElementById('sunrise').textContent = fmt(times.sunrise);
-        document.getElementById('shema').textContent = fmt(times.sofZmanShma);
-        document.getElementById('chatzot').textContent = fmt(times.chatzot);
-        document.getElementById('sunset').textContent = fmt(times.sunset);
-        document.getElementById('tzait').textContent = fmt(times.tzeit);
+        const times = data.times;
         
-        console.log('✅ Zmanim displayed');
+        // Update display with extracted times
+        document.getElementById('alot').textContent = extractTime(times.alotHaShachar);
+        document.getElementById('sunrise').textContent = extractTime(times.sunrise);
+        document.getElementById('shema').textContent = extractTime(times.sofZmanShma);
+        document.getElementById('chatzot').textContent = extractTime(times.chatzot);
+        document.getElementById('sunset').textContent = extractTime(times.sunset);
+        document.getElementById('tzait').textContent = extractTime(times.tzeit);
+        
+        console.log('✅ Zmanim displayed correctly');
         
       } catch (error) {
         console.error('❌ Error fetching zmanim:', error);
-        // Fallback to calculated zmanim
+        console.log('⚠️ Trying alternative method...');
+        
+        // Try direct URL approach
+        fetchZmanimDirect();
+      }
+    }
+    
+    // ============= DIRECT ZMANIM FETCH =============
+    async function fetchZmanimDirect() {
+      try {
+        const lat = CONFIG.location?.lat || 32.089157;
+        const lng = CONFIG.location?.lng || 34.887835;
+        
+        // Get today's date in YYYY-MM-DD format
+        const today = new Date();
+        const year = today.getFullYear();
+        const month = String(today.getMonth() + 1).padStart(2, '0');
+        const day = String(today.getDate()).padStart(2, '0');
+        const dateStr = `${year}-${month}-${day}`;
+        
+        const url = `https://www.hebcal.com/zmanim?cfg=json&geonameid=293703&date=${dateStr}`;
+        
+        console.log('🕐 Trying direct hebcal fetch for:', dateStr);
+        
+        const response = await fetch(url);
+        const data = await response.json();
+        
+        console.log('✅ Direct zmanim:', data);
+        
+        // Parse times - they come as "HH:MM:SS" strings
+        const parseTime = (timeStr) => {
+          if (!timeStr) return '--:--';
+          
+          // If it's already in HH:MM:SS format, just take HH:MM
+          if (timeStr.includes(':')) {
+            return timeStr.substring(0, 5);
+          }
+          
+          // If it's a full ISO string, parse it
+          const date = new Date(timeStr);
+          return date.toLocaleTimeString('he-IL', { 
+            hour: '2-digit', 
+            minute: '2-digit',
+            hour12: false
+          });
+        };
+        
+        const times = data.times;
+        
+        document.getElementById('alot').textContent = parseTime(times.alotHaShachar);
+        document.getElementById('sunrise').textContent = parseTime(times.sunrise);
+        document.getElementById('shema').textContent = parseTime(times.sofZmanShma);
+        document.getElementById('chatzot').textContent = parseTime(times.chatzot);
+        document.getElementById('sunset').textContent = parseTime(times.sunset);
+        document.getElementById('tzait').textContent = parseTime(times.tzeit);
+        
+        console.log('✅ Direct zmanim displayed');
+        
+      } catch (error) {
+        console.error('❌ Direct fetch also failed:', error);
+        
+        // Final fallback - calculate locally
         calculateZmanim();
       }
     }
