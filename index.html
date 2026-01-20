@@ -435,6 +435,10 @@
     // ============= CONFIG - ה-URL שלך מ-Google Apps Script =============
     const GOOGLE_SHEET_URL = 'https://script.google.com/macros/s/AKfycbyeTnLiNB0edvktOLCMv4EzEc7MmrkQBQKgWcpURVIDYesr8cSHci_k6CpgkKHIep2aDg/exec';
     
+    // ============= API KEYS =============
+    // הדבק כאן את ה-API Key שלך מ-OpenWeatherMap
+    const OPENWEATHER_API_KEY = 'd6c0e81f9f6033ab44966be36d3d865f'; // Get from: https://openweathermap.org/api
+    
     // ============= GLOBAL VARIABLES =============
     let CONFIG = {};
     let centralNotices = [];
@@ -486,24 +490,132 @@
       document.getElementById('buildingName').textContent = CONFIG.buildingName || 'בניין תמר';
       document.getElementById('hebrewYear').textContent = CONFIG.hebrewYear || 'התשפ״ו';
       
-      // Weather
-      if (weatherData) {
-        displayWeather();
-      }
-      
       // Sidebar
       displaySidebar();
       
       // Ticker
       displayTicker();
       
-      // Zmanim
-      calculateZmanim();
+      // Fetch real data from APIs
+      fetchZmanimFromAPI();
+      fetchWeatherFromAPI();
       
       // Start rotation
       rotateNotice();
       
       console.log('✅ UI updated successfully');
+    }
+
+    // ============= FETCH ZMANIM FROM HEBCAL API =============
+    async function fetchZmanimFromAPI() {
+      try {
+        const lat = CONFIG.location?.lat || 32.089157;
+        const lng = CONFIG.location?.lng || 34.887835;
+        
+        const url = `https://www.hebcal.com/zmanim?cfg=json&latitude=${lat}&longitude=${lng}&tzid=Asia/Jerusalem`;
+        
+        console.log('🕐 Fetching zmanim from hebcal.com...');
+        const response = await fetch(url);
+        const data = await response.json();
+        
+        console.log('✅ Zmanim received:', data);
+        
+        // Extract times
+        const times = data.times;
+        
+        // Format time from "HH:MM:SS" to "HH:MM"
+        const fmt = (timeStr) => {
+          if (!timeStr) return '--:--';
+          return timeStr.substring(0, 5); // Take only HH:MM
+        };
+        
+        document.getElementById('alot').textContent = fmt(times.alotHaShachar);
+        document.getElementById('sunrise').textContent = fmt(times.sunrise);
+        document.getElementById('shema').textContent = fmt(times.sofZmanShma);
+        document.getElementById('chatzot').textContent = fmt(times.chatzot);
+        document.getElementById('sunset').textContent = fmt(times.sunset);
+        document.getElementById('tzait').textContent = fmt(times.tzeit);
+        
+        console.log('✅ Zmanim displayed');
+        
+      } catch (error) {
+        console.error('❌ Error fetching zmanim:', error);
+        // Fallback to calculated zmanim
+        calculateZmanim();
+      }
+    }
+
+    // ============= FETCH WEATHER FROM OPENWEATHERMAP API =============
+    async function fetchWeatherFromAPI() {
+      try {
+        // Check if API key is configured
+        if (!OPENWEATHER_API_KEY || OPENWEATHER_API_KEY.includes('הדבק_כאן')) {
+          console.warn('⚠️ OpenWeatherMap API key not configured, using demo data');
+          displayWeather(); // Use data from Google Sheets
+          return;
+        }
+        
+        const lat = CONFIG.location?.lat || 32.089157;
+        const lng = CONFIG.location?.lng || 34.887835;
+        
+        const url = `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lng}&appid=${OPENWEATHER_API_KEY}&units=metric&lang=he&cnt=5`;
+        
+        console.log('🌤️ Fetching weather from OpenWeatherMap...');
+        const response = await fetch(url);
+        const data = await response.json();
+        
+        if (data.cod !== '200') {
+          throw new Error(data.message);
+        }
+        
+        console.log('✅ Weather received:', data);
+        
+        // Process forecast - take every 2nd item (6 hour intervals)
+        const forecast = [];
+        for (let i = 0; i < data.list.length; i += 2) {
+          if (forecast.length >= 4) break;
+          
+          const item = data.list[i];
+          const date = new Date(item.dt * 1000);
+          
+          // Map OpenWeather icon codes to emojis
+          const iconMap = {
+            '01d': '☀️', '01n': '🌙',
+            '02d': '⛅', '02n': '☁️',
+            '03d': '☁️', '03n': '☁️',
+            '04d': '☁️', '04n': '☁️',
+            '09d': '🌧️', '09n': '🌧️',
+            '10d': '🌦️', '10n': '🌧️',
+            '11d': '⛈️', '11n': '⛈️',
+            '13d': '🌨️', '13n': '🌨️',
+            '50d': '🌫️', '50n': '🌫️'
+          };
+          
+          forecast.push({
+            day: date.toLocaleDateString('he-IL', { weekday: 'short' }),
+            time: date.toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' }),
+            icon: iconMap[item.weather[0].icon] || '🌤️',
+            temp: Math.round(item.main.temp)
+          });
+        }
+        
+        // Update weather data
+        weatherData = {
+          current: {
+            temp: Math.round(data.list[0].main.temp),
+            description: data.list[0].weather[0].description,
+            icon: iconMap[data.list[0].weather[0].icon] || '🌤️'
+          },
+          forecast: forecast
+        };
+        
+        displayWeather();
+        
+      } catch (error) {
+        console.error('❌ Error fetching weather:', error);
+        // Fallback to data from Google Sheets
+        displayWeather();
+      }
     }
 
     // ============= DISPLAY FUNCTIONS =============
@@ -522,12 +634,12 @@
       
       if (weatherData.forecast && weatherData.forecast.length > 0) {
         html += '<div class="weather-forecast">';
-        weatherData.forecast.forEach(day => {
+        weatherData.forecast.forEach(item => {
           html += `
             <div class="forecast-item">
-              <div class="forecast-day">${day.day}</div>
-              <div class="forecast-icon">${day.icon}</div>
-              <div class="forecast-temp">${day.temp}°</div>
+              <div class="forecast-day">${item.day} ${item.time || ''}</div>
+              <div class="forecast-icon">${item.icon}</div>
+              <div class="forecast-temp">${item.temp}°</div>
             </div>
           `;
         });
@@ -693,16 +805,24 @@
     // Load data from Google Sheets
     loadDataFromSheets();
     
-    // Reload data every 5 minutes to get updates from Google Sheets
+    // Reload data every 5 minutes
     setInterval(loadDataFromSheets, 300000);
+    
+    // Update zmanim and weather every hour
+    setInterval(() => {
+      if (CONFIG.location) {
+        fetchZmanimFromAPI();
+        fetchWeatherFromAPI();
+      }
+    }, 3600000); // Every hour
     
     // Update zmanim daily at midnight
     const now = new Date();
     const msUntilMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 0, 0, 0) - now;
     setTimeout(() => {
-      calculateZmanim();
-      // Then update every 24 hours
-      setInterval(calculateZmanim, 86400000);
+      fetchZmanimFromAPI();
+      // Then update daily
+      setInterval(fetchZmanimFromAPI, 86400000);
     }, msUntilMidnight);
     
     console.log('✅ Board initialized');
