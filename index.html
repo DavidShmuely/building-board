@@ -335,8 +335,8 @@
       align-items: center;
       justify-content: center;
       height: 100%;
-      font-size: 24px;
-      color: white;
+      font-size: 20px;
+      color: #999;
     }
 
     .error {
@@ -355,7 +355,7 @@
     <div class="header">
       <div class="logo-section">
         <div class="building-icon">
-          <img id="buildingLogo" src="" alt="לוגו בניין">
+          <img id="buildingLogo" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Crect fill='%23f4e4c1' width='200' height='200'/%3E%3Ctext x='100' y='100' text-anchor='middle' dominant-baseline='middle' font-size='60' fill='%23d4924e'%3E🏢%3C/text%3E%3C/svg%3E" alt="לוגו בניין">
         </div>
         <div class="building-name" id="buildingName">טוען...</div>
       </div>
@@ -432,8 +432,8 @@
   </div>
 
   <script>
-    // ============= CONFIG - הדבק כאן את ה-URL מ-Google Apps Script =============
-    const GOOGLE_SHEET_URL = https://myaccount.google.com/info/supervisedsignedout?continue=https%3A%2F%2Fscript.googleusercontent.com%2Fmacros%2Fecho%3Fuser_content_key%3DAehSKLip83YqkyOqZKhbgKWmu_7lCitWAzhmNylhW-JKyflQO5x8Xj2SAedUakqqWFD23qVzRCvZFdpNigjlxSzU9GsZBegTNU-FeIcRkjmGY5xaEBxwPIkv9D8BnPrTeAxFTUnOxRGKYirbNg6k9oRzsQ7UYdhMNl6RKk1tCBFSjuMI-KsN2ecrMOBTqpHTGleiRHheVzhH5WxuJxUH1z3EVa0UrXXWGxc3dCvhgh8cR5Hfu5X_pyhaplHnyCh1pIyUtTvWlHPPIo2fqluTJha7gDircAoG43EuHloO-c8W%26lib%3DM6gGBj3L82yCXYkeTtlcafXjQiBtTwFOb;
+    // ============= CONFIG - ה-URL שלך מ-Google Apps Script =============
+    const GOOGLE_SHEET_URL = 'https://script.google.com/macros/s/AKfycbyeTnLiNB0edvktOLCMv4EzEc7MmrkQBQKgWcpURVIDYesr8cSHci_k6CpgkKHIep2aDg/exec';
     
     // ============= GLOBAL VARIABLES =============
     let CONFIG = {};
@@ -446,12 +446,7 @@
     // ============= LOAD DATA FROM GOOGLE SHEETS =============
     async function loadDataFromSheets() {
       try {
-        console.log('Loading data from Google Sheets...');
-        
-        // Check if URL is configured
-        if (!GOOGLE_SHEET_URL || GOOGLE_SHEET_URL.includes('הדבק_כאן')) {
-          throw new Error('אנא הדבק את ה-URL של Google Apps Script בשורה 364');
-        }
+        console.log('🔄 Loading data from Google Sheets...');
         
         const response = await fetch(GOOGLE_SHEET_URL);
         
@@ -465,6 +460,8 @@
           throw new Error(data.error);
         }
         
+        console.log('✅ Data loaded:', data);
+        
         // Load all data
         CONFIG = data.config || {};
         centralNotices = data.central || [];
@@ -472,64 +469,22 @@
         tickerMessages = data.ticker || [];
         weatherData = data.weather || null;
         
-        console.log('Data loaded successfully:', data);
-        
         // Apply data to UI
         applyData();
         
       } catch (error) {
-        console.error('Error loading data:', error);
-        showError('שגיאה בטעינת נתונים: ' + error.message);
-        
-        // Fallback to demo data
-        loadDemoData();
+        console.error('❌ Error loading data:', error);
+        showError('שגיאה בטעינת נתונים מ-Google Sheets: ' + error.message);
       }
-    }
-
-    // ============= FALLBACK DEMO DATA =============
-    function loadDemoData() {
-      console.log('Loading demo data...');
-      
-      CONFIG = {
-        buildingName: 'בניין תמר (מצב הדגמה)',
-        hebrewYear: 'התשפ״ו',
-        location: { lat: 32.0853, lng: 34.7818 },
-        intervals: { centralNotice: 8000, ticker: 30000 },
-        logo: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="200" height="200"%3E%3Crect fill="%23f4e4c1" width="200" height="200"/%3E%3Ctext x="100" y="100" text-anchor="middle" dominant-baseline="middle" font-size="60" fill="%23d4924e"%3E🏢%3C/text%3E%3C/svg%3E'
-      };
-      
-      centralNotices = [
-        { title: '♻️ מה שייכים לפח הכתום?', content: 'אריזות ריקות בלבד', image: null },
-        { title: '⚠️ תחזוקה מתוכננת', content: 'יום ראשון 08:00-12:00', image: null }
-      ];
-      
-      sidebarNotices = [
-        { icon: '🕐', title: 'שעות פעילות מעלית', text: '24/7' },
-        { icon: '📬', title: 'איסוף דואר', text: 'א׳-ה׳ 08:00-17:00' }
-      ];
-      
-      tickerMessages = [
-        'שמירה על הניקיון במרחבים המשותפים',
-        'אנא לנעול את דלת הכניסה אחריכם'
-      ];
-      
-      weatherData = {
-        current: { temp: 22, description: 'בהיר', icon: '☀️' },
-        forecast: [
-          { day: 'יום א׳', icon: '☀️', temp: 24 },
-          { day: 'יום ב׳', icon: '⛅', temp: 23 }
-        ]
-      };
-      
-      applyData();
     }
 
     // ============= APPLY DATA TO UI =============
     function applyData() {
+      console.log('📋 Applying data to UI...');
+      
       // Header
       document.getElementById('buildingName').textContent = CONFIG.buildingName || 'בניין תמר';
       document.getElementById('hebrewYear').textContent = CONFIG.hebrewYear || 'התשפ״ו';
-      document.getElementById('buildingLogo').src = CONFIG.logo || '';
       
       // Weather
       if (weatherData) {
@@ -547,6 +502,8 @@
       
       // Start rotation
       rotateNotice();
+      
+      console.log('✅ UI updated successfully');
     }
 
     // ============= DISPLAY FUNCTIONS =============
@@ -591,7 +548,7 @@
         </div>
       `).join('');
       
-      document.getElementById('sideNotices').innerHTML = html;
+      document.getElementById('sideNotices').innerHTML = html || '<div class="loading">אין הודעות</div>';
     }
 
     function displayTicker() {
@@ -600,7 +557,10 @@
     }
 
     function rotateNotice() {
-      if (centralNotices.length === 0) return;
+      if (centralNotices.length === 0) {
+        document.getElementById('centralNotice').innerHTML = '<div class="notice-title">אין הודעות להצגה</div>';
+        return;
+      }
       
       const el = document.getElementById('centralNotice');
       el.style.opacity = '0';
@@ -682,15 +642,15 @@
           <h2>⚠️ שגיאה</h2>
           <p>${message}</p>
           <p style="margin-top: 20px; font-size: 14px;">
-            בדוק שהדבקת את ה-URL הנכון מ-Google Apps Script<br>
-            והרשאות מוגדרות ל-"Anyone"
+            בדוק את ה-URL של Google Apps Script<br>
+            ושהרשאות מוגדרות ל-"Anyone"
           </p>
         </div>
       `;
     }
 
     // ============= INITIALIZATION =============
-    console.log('Initializing board...');
+    console.log('🚀 Initializing board...');
     
     // Start clock
     updateClock();
@@ -699,10 +659,10 @@
     // Load data from Google Sheets
     loadDataFromSheets();
     
-    // Reload data every 5 minutes to get updates
+    // Reload data every 5 minutes to get updates from Google Sheets
     setInterval(loadDataFromSheets, 300000);
     
-    console.log('Board initialized');
+    console.log('✅ Board initialized');
   </script>
 </body>
 </html>
