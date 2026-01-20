@@ -437,7 +437,7 @@
     
     // ============= API KEYS =============
     // הדבק כאן את ה-API Key שלך מ-OpenWeatherMap
-    const OPENWEATHER_API_KEY = 'd6c0e81f9f6033ab44966be36d3d865f'; // Get from: https://openweathermap.org/api
+    const OPENWEATHER_API_KEY = 'הדבק_כאן_API_KEY'; // Get from: https://openweathermap.org/api
     
     // ============= GLOBAL VARIABLES =============
     let CONFIG = {};
@@ -661,6 +661,19 @@
         
         console.log('✅ Weather received:', data);
         
+        // Map OpenWeather icon codes to emojis
+        const iconMap = {
+          '01d': '☀️', '01n': '🌙',
+          '02d': '⛅', '02n': '☁️',
+          '03d': '☁️', '03n': '☁️',
+          '04d': '☁️', '04n': '☁️',
+          '09d': '🌧️', '09n': '🌧️',
+          '10d': '🌦️', '10n': '🌧️',
+          '11d': '⛈️', '11n': '⛈️',
+          '13d': '🌨️', '13n': '🌨️',
+          '50d': '🌫️', '50n': '🌫️'
+        };
+        
         // Process forecast - take every 2nd item (6 hour intervals)
         const forecast = [];
         for (let i = 0; i < data.list.length; i += 2) {
@@ -668,19 +681,6 @@
           
           const item = data.list[i];
           const date = new Date(item.dt * 1000);
-          
-          // Map OpenWeather icon codes to emojis
-          const iconMap = {
-            '01d': '☀️', '01n': '🌙',
-            '02d': '⛅', '02n': '☁️',
-            '03d': '☁️', '03n': '☁️',
-            '04d': '☁️', '04n': '☁️',
-            '09d': '🌧️', '09n': '🌧️',
-            '10d': '🌦️', '10n': '🌧️',
-            '11d': '⛈️', '11n': '⛈️',
-            '13d': '🌨️', '13n': '🌨️',
-            '50d': '🌫️', '50n': '🌫️'
-          };
           
           forecast.push({
             day: date.toLocaleDateString('he-IL', { weekday: 'short' }),
@@ -701,11 +701,14 @@
         };
         
         displayWeather();
+        console.log('✅ Weather displayed');
         
       } catch (error) {
         console.error('❌ Error fetching weather:', error);
         // Fallback to data from Google Sheets
-        displayWeather();
+        if (weatherData) {
+          displayWeather();
+        }
       }
     }
 
