@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>לוח מודעות חכם - בניין תמר</title>
+  <title>לוח מודעות - בניין תמר (דמו)</title>
   <style>
     * {
       margin: 0;
@@ -23,67 +23,76 @@
       display: grid;
       grid-template-rows: auto 1fr auto;
       height: 100vh;
-      padding: 0;
-      gap: 0;
     }
 
     /* Header */
     .header {
       background: linear-gradient(135deg, #2c5aa0, #1e3a6d);
-      border-radius: 0;
-      padding: 15px 30px;
+      padding: 25px 30px;
       box-shadow: 0 4px 12px rgba(0,0,0,0.3);
       display: grid;
-      grid-template-columns: 200px 1fr 200px;
+      grid-template-columns: 150px 1fr 150px;
       align-items: center;
       gap: 30px;
       color: white;
       position: relative;
+      min-height: 130px;
+    }
+
+    .bsd {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      font-size: 14px;
+      color: rgba(255,255,255,0.9);
+      font-weight: 600;
+    }
+
+    .building-label {
+      position: absolute;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      width: 25%;
+      background: #1565c0;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      font-weight: 700;
+      box-shadow: -4px 0 12px rgba(0,0,0,0.3);
+      gap: 10px;
+      border-radius: 0 0 0 20px;
+    }
+
+    .building-label-icon {
+      font-size: 48px;
+    }
+
+    .building-label-text {
+      font-size: 28px;
+      text-align: center;
+      line-height: 1.2;
     }
 
     .logo-section {
       display: flex;
       align-items: center;
-      gap: 15px;
+      justify-content: center;
     }
 
     .building-icon {
-      width: 70px;
-      height: 70px;
+      width: 80px;
+      height: 80px;
       background: white;
       border-radius: 50%;
-      padding: 8px;
-      box-shadow: 0 3px 10px rgba(0,0,0,0.2);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 36px;
-    }
-
-    .building-icon img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      border-radius: 50%;
-    }
-
-    .logo-text {
-      display: flex;
-      flex-direction: column;
-      gap: 3px;
-    }
-
-    .logo-brand {
-      font-size: 18px;
-      font-weight: 700;
-      color: #4fc3f7;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-    }
-
-    .logo-subtitle {
-      font-size: 12px;
-      opacity: 0.8;
+      font-size: 42px;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.2);
     }
 
     .header-center {
@@ -91,313 +100,186 @@
     }
 
     .time {
-      font-size: 64px;
+      font-size: 72px;
       font-weight: 800;
       line-height: 1;
-      font-variant-numeric: tabular-nums;
       text-shadow: 0 3px 8px rgba(0,0,0,0.3);
-      letter-spacing: 2px;
     }
 
-    .dates {
-      margin-top: 8px;
-      font-size: 16px;
-      opacity: 0.95;
+    .header-left {
       display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 15px;
-    }
-
-    .date-separator {
-      width: 2px;
-      height: 16px;
-      background: rgba(255,255,255,0.3);
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 5px;
     }
 
     .date-hebrew {
-      font-weight: 600;
-    }
-
-    .building-label {
-      position: absolute;
-      top: -15px;
-      right: 30px;
-      background: #1565c0;
-      color: white;
-      padding: 10px 30px;
-      border-radius: 25px;
       font-size: 18px;
-      font-weight: 700;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      z-index: 10;
-    }
-
-    .building-label::before {
-      content: '📍';
-      font-size: 22px;
-    }
-
-    /* Weather Widget */
-    .weather-widget {
-      background: rgba(255,255,255,0.15);
-      backdrop-filter: blur(10px);
-      border-radius: 12px;
-      padding: 15px 20px;
-      min-width: 280px;
-    }
-
-    .weather-current {
-      display: flex;
-      align-items: center;
-      gap: 15px;
-      margin-bottom: 10px;
-    }
-
-    .weather-icon {
-      font-size: 48px;
-    }
-
-    .weather-temp {
-      font-size: 42px;
-      font-weight: 700;
-    }
-
-    .weather-desc {
-      font-size: 16px;
-      opacity: 0.9;
-    }
-
-    .weather-forecast {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 10px;
-      margin-top: 10px;
-      padding-top: 10px;
-      border-top: 1px solid rgba(255,255,255,0.2);
-    }
-
-    .forecast-item {
-      text-align: center;
-      font-size: 14px;
-    }
-
-    .forecast-day {
-      opacity: 0.8;
-      margin-bottom: 5px;
-    }
-
-    .forecast-icon {
-      font-size: 24px;
-      margin: 5px 0;
-    }
-
-    .forecast-temp {
       font-weight: 600;
+    }
+
+    .date-gregorian {
+      font-size: 14px;
+      opacity: 0.9;
     }
 
     /* Main Content */
     .main-content {
       display: grid;
-      grid-template-columns: 2.5fr 1fr;
+      grid-template-columns: 1fr 2.5fr 1fr;
       gap: 15px;
       padding: 15px;
-      background: #e8eef5;
     }
 
-    .card {
-      background: white;
-      border-radius: 16px;
-      padding: 25px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-      overflow: hidden;
-    }
-
-    /* Central Area */
-    .central-area {
-      display: grid;
-      grid-template-rows: auto 1fr;
-      gap: 20px;
-    }
-
-    .zmanim-bar {
-      background: linear-gradient(135deg, #f8f9fa, #e9ecef);
-      border-radius: 12px;
-      padding: 15px 20px;
-      display: grid;
-      grid-template-columns: repeat(6, 1fr);
-      gap: 15px;
-      border: 2px solid #667eea;
-    }
-
-    .zman-item {
-      text-align: center;
-    }
-
-    .zman-label {
-      font-size: 13px;
-      color: #666;
-      margin-bottom: 4px;
-    }
-
-    .zman-time {
-      font-size: 18px;
-      font-weight: 700;
-      color: #667eea;
-    }
-
-    .central-notice {
+    .left-sidebar {
       display: flex;
       flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      text-align: center;
-      background: linear-gradient(135deg, #fff5e6, #ffe6f0);
-      border-radius: 12px;
-      padding: 30px;
-      transition: opacity 0.5s ease;
+      gap: 15px;
     }
 
-    .notice-image {
-      max-width: 300px;
-      max-height: 300px;
-      margin-bottom: 20px;
-      border-radius: 12px;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    }
-
-    .notice-title {
-      font-size: 36px;
-      font-weight: 700;
-      color: #667eea;
-      margin-bottom: 15px;
-    }
-
-    .notice-content {
-      font-size: 24px;
-      line-height: 1.5;
-      color: #444;
-    }
-
-    /* Right Sidebar */
     .right-sidebar {
       display: flex;
       flex-direction: column;
       gap: 15px;
     }
 
-    .sidebar-section {
+    .card {
       background: white;
-      border-radius: 16px;
+      border-radius: 12px;
       padding: 20px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }
 
-    .section-title {
-      font-size: 20px;
-      font-weight: 700;
-      color: #764ba2;
+    .weather-card {
+      background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+      padding: 15px;
+    }
+
+    .weather-card h3 {
+      font-size: 16px;
+      color: #1976d2;
       margin-bottom: 15px;
-      padding-bottom: 10px;
-      border-bottom: 3px solid #764ba2;
       display: flex;
       align-items: center;
       gap: 8px;
     }
 
-    .notice-list {
+    .weather-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+
+    .weather-day {
+      background: white;
+      padding: 10px;
+      border-radius: 8px;
+      text-align: center;
+    }
+
+    .weather-day-name {
+      font-size: 12px;
+      color: #666;
+      margin-bottom: 5px;
+    }
+
+    .weather-day-icon {
+      font-size: 32px;
+      margin: 5px 0;
+    }
+
+    .weather-day-temp {
+      font-size: 18px;
+      font-weight: 700;
+      color: #1976d2;
+    }
+
+    .zmanim-card {
+      background: linear-gradient(135deg, #fff3e0, #ffe0b2);
+    }
+
+    .zmanim-card h3 {
+      font-size: 16px;
+      color: #e65100;
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .zman-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid rgba(230,81,0,0.1);
+    }
+
+    .zman-row:last-child {
+      border-bottom: none;
+    }
+
+    .zman-label {
+      font-size: 13px;
+      color: #666;
+    }
+
+    .zman-time {
+      font-size: 14px;
+      font-weight: 700;
+      color: #e65100;
+    }
+
+    .central-notice {
+      background: linear-gradient(135deg, #fff5e6, #ffe6f0);
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      min-height: 400px;
+    }
+
+    .notice-title {
+      font-size: 32px;
+      font-weight: 700;
+      color: #667eea;
+      margin-bottom: 15px;
+    }
+
+    .notice-content {
+      font-size: 20px;
+      color: #444;
+      line-height: 1.5;
+    }
+
+    .sidebar-section h3 {
+      font-size: 18px;
+      color: #764ba2;
+      margin-bottom: 15px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #764ba2;
     }
 
     .notice-item {
-      padding: 12px;
-      background: linear-gradient(135deg, #f8f9fa, #fff);
+      padding: 10px;
+      background: #f8f9fa;
       border-radius: 8px;
-      border-right: 4px solid #667eea;
-      transition: transform 0.2s;
-    }
-
-    .notice-item:hover {
-      transform: translateX(-3px);
-    }
-
-    .notice-item-icon {
-      font-size: 20px;
-      margin-left: 8px;
+      margin-bottom: 10px;
+      border-right: 3px solid #667eea;
     }
 
     .notice-item-title {
       font-weight: 600;
-      font-size: 16px;
-      color: #333;
-      margin-bottom: 4px;
+      margin-bottom: 5px;
     }
 
-    .notice-item-text {
-      font-size: 14px;
-      color: #666;
-      line-height: 1.4;
-    }
-
-    /* Footer Ticker */
+    /* Footer */
     .footer {
       background: linear-gradient(135deg, #2c3e50, #34495e);
-      border-radius: 12px;
-      padding: 15px 0;
-      box-shadow: 0 -4px 12px rgba(0,0,0,0.2);
-      overflow: hidden;
-      position: relative;
-    }
-
-    .ticker-label {
-      position: absolute;
-      right: 20px;
-      top: 50%;
-      transform: translateY(-50%);
-      background: #e74c3c;
       color: white;
-      padding: 5px 15px;
-      border-radius: 20px;
-      font-weight: 700;
-      font-size: 14px;
-      z-index: 10;
-    }
-
-    .ticker-content {
-      color: white;
-      font-size: 20px;
-      white-space: nowrap;
-      padding-right: 100%;
-      animation: ticker 30s linear infinite;
-    }
-
-    @keyframes ticker {
-      0% { transform: translateX(100%); }
-      100% { transform: translateX(-100%); }
-    }
-
-    /* Loading */
-    .loading {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      height: 100%;
-      font-size: 20px;
-      color: #999;
-    }
-
-    .error {
-      background: #ef4444;
-      color: white;
-      padding: 20px;
-      border-radius: 12px;
+      padding: 15px;
       text-align: center;
-      margin: 20px;
+      font-size: 18px;
     }
   </style>
 </head>
@@ -405,585 +287,208 @@
   <div class="container">
     <!-- Header -->
     <div class="header">
-      <!-- Building Label -->
+      <div class="bsd">בס"ד</div>
       <div class="building-label">בניין תמר</div>
       
-      <!-- Logo Section -->
       <div class="logo-section">
-        <div class="building-icon">
-          <img id="buildingLogo" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Crect fill='%232c5aa0' width='200' height='200'/%3E%3Ctext x='100' y='100' text-anchor='middle' dominant-baseline='middle' font-size='80' fill='white'%3E🏢%3C/text%3E%3C/svg%3E" alt="לוגו בניין">
-        </div>
-        <div class="logo-text">
-          <div class="logo-brand">GoMixApp</div>
-          <div class="logo-subtitle">מערכת ניהול</div>
-        </div>
+        <div class="building-icon">🏢</div>
       </div>
 
-      <!-- Clock Section -->
       <div class="header-center">
-        <div class="time" id="time">00:00:00</div>
-        <div class="dates">
-          <span id="dateGregorian">טוען...</span>
-          <div class="date-separator"></div>
-          <span class="date-hebrew" id="hebrewYear">טוען...</span>
-        </div>
+        <div class="time" id="time">10:15:42</div>
       </div>
 
-      <!-- Weather Widget -->
-      <div class="weather-widget" id="weatherWidget">
-        <div class="loading">טוען...</div>
+      <div class="header-left">
+        <div class="date-hebrew" id="dateHebrew">כ"ב שבט התשפ"ו</div>
+        <div class="date-gregorian" id="dateGreg">יום רביעי, 21 בינואר 2026</div>
       </div>
     </div>
 
     <!-- Main Content -->
     <div class="main-content">
-      <div class="central-area">
-        <!-- Zmanim Bar -->
-        <div class="zmanim-bar">
-          <div class="zman-item">
-            <div class="zman-label">עלות השחר</div>
-            <div class="zman-time" id="alot">--:--</div>
+      <!-- Right Sidebar: Notices (זה ימין בעברית!) -->
+      <div class="right-sidebar">
+        <div class="sidebar-section card">
+          <h3>📢 הודעות לדיירים</h3>
+          <div class="notice-item">
+            <div class="notice-item-title">🕐 שעות פעילות מעלית</div>
+            <div>24/7</div>
           </div>
-          <div class="zman-item">
-            <div class="zman-label">הנץ החמה</div>
-            <div class="zman-time" id="sunrise">--:--</div>
+          <div class="notice-item">
+            <div class="notice-item-title">📬 איסוף דואר</div>
+            <div>א׳-ה׳ 08:00-17:00</div>
           </div>
-          <div class="zman-item">
-            <div class="zman-label">סוף זמן ק״ש</div>
-            <div class="zman-time" id="shema">--:--</div>
+          <div class="notice-item">
+            <div class="notice-item-title">💰 גביית ארנונה</div>
+            <div>עד ה-10 לחודש</div>
           </div>
-          <div class="zman-item">
-            <div class="zman-label">חצות</div>
-            <div class="zman-time" id="chatzot">--:--</div>
+          <div class="notice-item">
+            <div class="notice-item-title">☎️ מספר חירום</div>
+            <div>שומר: 050-1234567</div>
           </div>
-          <div class="zman-item">
-            <div class="zman-label">שקיעה</div>
-            <div class="zman-time" id="sunset">--:--</div>
+          <div class="notice-item">
+            <div class="notice-item-title">🔧 תחזוקה</div>
+            <div>יצחק: 052-9876543</div>
           </div>
-          <div class="zman-item">
-            <div class="zman-label">צאת כוכבים</div>
-            <div class="zman-time" id="tzait">--:--</div>
-          </div>
-        </div>
-
-        <!-- Central Notice -->
-        <div class="card central-notice" id="centralNotice">
-          <div class="loading">טוען הודעות...</div>
         </div>
       </div>
 
-      <!-- Right Sidebar -->
-      <div class="right-sidebar">
-        <div class="sidebar-section">
-          <div class="section-title">
-            <span>📢</span>
-            <span>הודעות לדיירים</span>
+      <!-- Center: Main Notice -->
+      <div>
+        <div class="card central-notice">
+          <div class="notice-title">♻️ מה שייכים לפח הכתום?</div>
+          <div class="notice-content">
+            אריזות ריקות בלבד:<br>
+            • אריזות מזון 🥫<br>
+            • אריזות משקה 🧃<br>
+            • אריזות שקשוק 🧴
           </div>
-          <div class="notice-list" id="sideNotices">
-            <div class="loading">טוען...</div>
+        </div>
+      </div>
+
+      <!-- Left Sidebar: Weather + Zmanim (זה שמאל בעברית!) -->
+      <div class="left-sidebar">
+        <!-- Weather Card -->
+        <div class="card weather-card">
+          <h3>🌤️ מזג אוויר</h3>
+          <div class="weather-grid">
+            <div class="weather-day">
+              <div class="weather-day-name">יום א׳</div>
+              <div class="weather-day-icon">☀️</div>
+              <div class="weather-day-temp">24°</div>
+            </div>
+            <div class="weather-day">
+              <div class="weather-day-name">יום ב׳</div>
+              <div class="weather-day-icon">⛅</div>
+              <div class="weather-day-temp">23°</div>
+            </div>
+            <div class="weather-day">
+              <div class="weather-day-name">יום ג׳</div>
+              <div class="weather-day-icon">🌤️</div>
+              <div class="weather-day-temp">21°</div>
+            </div>
+            <div class="weather-day">
+              <div class="weather-day-name">יום ד׳</div>
+              <div class="weather-day-icon">☀️</div>
+              <div class="weather-day-temp">25°</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Zmanim Card -->
+        <div class="card zmanim-card">
+          <h3>🕐 זמני היום</h3>
+          <div class="zman-row">
+            <span class="zman-label">עלות השחר</span>
+            <span class="zman-time">05:24</span>
+          </div>
+          <div class="zman-row">
+            <span class="zman-label">הנץ החמה</span>
+            <span class="zman-time">06:40</span>
+          </div>
+          <div class="zman-row">
+            <span class="zman-label">סוף זמן ק״ש</span>
+            <span class="zman-time">09:33</span>
+          </div>
+          <div class="zman-row">
+            <span class="zman-label">חצות</span>
+            <span class="zman-time">12:05</span>
+          </div>
+          <div class="zman-row">
+            <span class="zman-label">שקיעה</span>
+            <span class="zman-time">17:31</span>
+          </div>
+          <div class="zman-row">
+            <span class="zman-label">צאת כוכבים</span>
+            <span class="zman-time">18:12</span>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Footer Ticker -->
+    <!-- Footer -->
     <div class="footer">
-      <div class="ticker-label">חדשות</div>
-      <div class="ticker-content" id="ticker">טוען הודעות...</div>
+      שמירה על הניקיון במרחבים המשותפים - תודה רבה! 🧹
     </div>
   </div>
 
   <script>
-    // ============= CONFIG - ה-URL שלך מ-Google Apps Script =============
-    const GOOGLE_SHEET_URL = 'https://script.google.com/macros/s/AKfycbyeTnLiNB0edvktOLCMv4EzEc7MmrkQBQKgWcpURVIDYesr8cSHci_k6CpgkKHIep2aDg/exec';
-    
-    // ============= API KEYS =============
-    // OpenWeatherMap API Key
-    const OPENWEATHER_API_KEY = 'd6c0e81f9f6033ab44966be36d3d865f';
-    
-    // ============= GLOBAL VARIABLES =============
-    let CONFIG = {};
-    let centralNotices = [];
-    let sidebarNotices = [];
-    let tickerMessages = [];
-    let weatherData = null;
-    let noticeIndex = 0;
+    // Petah Tikva coordinates
+    const latitude = 32.0853;
+    const longitude = 34.8878;
 
-    // ============= LOAD DATA FROM GOOGLE SHEETS =============
-    async function loadDataFromSheets() {
+    async function getHebrewDateAndZmanim() {
       try {
-        console.log('🔄 Loading data from Google Sheets...');
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
         
-        const response = await fetch(GOOGLE_SHEET_URL);
+        // Get Hebrew date
+        const dateUrl = `https://www.hebcal.com/converter?cfg=json&gy=${year}&gm=${month}&gd=${day}&g2h=1`;
+        const dateResponse = await fetch(dateUrl);
+        const dateData = await dateResponse.json();
         
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
+        if (dateData.hebrew) {
+          document.getElementById('dateHebrew').textContent = dateData.hebrew;
         }
-        
-        const data = await response.json();
-        
-        if (data.error) {
-          throw new Error(data.error);
-        }
-        
-        console.log('✅ Data loaded:', data);
-        
-        // Load all data
-        CONFIG = data.config || {};
-        centralNotices = data.central || [];
-        sidebarNotices = data.sidebar || [];
-        tickerMessages = data.ticker || [];
-        weatherData = data.weather || null;
-        
-        // If zmanim is provided from Google Sheets, use it
-        if (data.zmanim) {
-          console.log('✅ Using zmanim from Google Sheets');
-          displayZmanimFromData(data.zmanim);
-        }
-        
-        // Apply data to UI
-        applyData();
-        
-      } catch (error) {
-        console.error('❌ Error loading data:', error);
-        showError('שגיאה בטעינת נתונים מ-Google Sheets: ' + error.message);
-      }
-    }
-    
-    // Display zmanim from Google Sheets data
-    function displayZmanimFromData(zmanim) {
-      document.getElementById('alot').textContent = zmanim.alot || '--:--';
-      document.getElementById('sunrise').textContent = zmanim.sunrise || '--:--';
-      document.getElementById('shema').textContent = zmanim.shema || '--:--';
-      document.getElementById('chatzot').textContent = zmanim.chatzot || '--:--';
-      document.getElementById('sunset').textContent = zmanim.sunset || '--:--';
-      document.getElementById('tzait').textContent = zmanim.tzait || '--:--';
-    }
 
-    // ============= APPLY DATA TO UI =============
-    function applyData() {
-      console.log('📋 Applying data to UI...');
-      
-      // Header - update only if elements exist
-      const hebrewYearEl = document.getElementById('hebrewYear');
-      if (hebrewYearEl) {
-        hebrewYearEl.textContent = CONFIG.hebrewYear || 'התשפ״ו';
-      }
-      
-      // Sidebar
-      displaySidebar();
-      
-      // Ticker
-      displayTicker();
-      
-      // Fetch real data from APIs
-      fetchZmanimFromAPI();
-      fetchWeatherFromAPI();
-      
-      // Start rotation
-      rotateNotice();
-      
-      console.log('✅ UI updated successfully');
-    }
+        // Get zmanim
+        const zmanimUrl = `https://www.hebcal.com/zmanim?cfg=json&latitude=${latitude}&longitude=${longitude}&date=${year}-${month}-${day}`;
+        const zmanimResponse = await fetch(zmanimUrl);
+        const zmanimData = await zmanimResponse.json();
+        
+        if (zmanimData.times) {
+          const times = zmanimData.times;
+          const zmanimElements = document.querySelectorAll('.zman-time');
+          
+          // Map zmanim to display times
+          const displayTimes = [
+            times.alotHaShachar,
+            times.sunrise,
+            times.sofZmanShma,
+            times.chatzot,
+            times.sunset,
+            times.tzeit7083deg
+          ];
 
-    // ============= FETCH ZMANIM - FIXED VERSION =============
-    async function fetchZmanimFromAPI() {
-      try {
-        const lat = CONFIG.location?.lat || 32.089157;
-        const lng = CONFIG.location?.lng || 34.887835;
-        
-        // Using hebcal API with correct parsing
-        const url = `https://www.hebcal.com/zmanim?cfg=json&latitude=${lat}&longitude=${lng}&tzid=Asia/Jerusalem`;
-        
-        console.log('🕐 Fetching zmanim from hebcal.com...');
-        
-        const response = await fetch(url);
-        const data = await response.json();
-        
-        console.log('✅ Zmanim raw data:', data);
-        
-        // The API returns times in ISO format like "2026-01-21T05:32:00+02:00"
-        // We need to extract ONLY the time part (HH:MM)
-        
-        const extractTime = (isoString) => {
-          if (!isoString) return '--:--';
-          
-          // Parse the ISO string to Date object
-          const date = new Date(isoString);
-          
-          // Format to HH:MM in local timezone
-          return date.toLocaleTimeString('he-IL', { 
-            hour: '2-digit', 
-            minute: '2-digit',
-            hour12: false,
-            timeZone: 'Asia/Jerusalem'
-          });
-        };
-        
-        const times = data.times;
-        
-        // Update display with extracted times
-        document.getElementById('alot').textContent = extractTime(times.alotHaShachar);
-        document.getElementById('sunrise').textContent = extractTime(times.sunrise);
-        document.getElementById('shema').textContent = extractTime(times.sofZmanShma);
-        document.getElementById('chatzot').textContent = extractTime(times.chatzot);
-        document.getElementById('sunset').textContent = extractTime(times.sunset);
-        document.getElementById('tzait').textContent = extractTime(times.tzeit);
-        
-        console.log('✅ Zmanim displayed correctly');
-        
-      } catch (error) {
-        console.error('❌ Error fetching zmanim:', error);
-        console.log('⚠️ Trying alternative method...');
-        
-        // Try direct URL approach
-        fetchZmanimDirect();
-      }
-    }
-    
-    // ============= DIRECT ZMANIM FETCH =============
-    async function fetchZmanimDirect() {
-      try {
-        const lat = CONFIG.location?.lat || 32.089157;
-        const lng = CONFIG.location?.lng || 34.887835;
-        
-        // Get today's date in YYYY-MM-DD format
-        const today = new Date();
-        const year = today.getFullYear();
-        const month = String(today.getMonth() + 1).padStart(2, '0');
-        const day = String(today.getDate()).padStart(2, '0');
-        const dateStr = `${year}-${month}-${day}`;
-        
-        const url = `https://www.hebcal.com/zmanim?cfg=json&geonameid=293703&date=${dateStr}`;
-        
-        console.log('🕐 Trying direct hebcal fetch for:', dateStr);
-        
-        const response = await fetch(url);
-        const data = await response.json();
-        
-        console.log('✅ Direct zmanim:', data);
-        
-        // Parse times - they come as "HH:MM:SS" strings
-        const parseTime = (timeStr) => {
-          if (!timeStr) return '--:--';
-          
-          // If it's already in HH:MM:SS format, just take HH:MM
-          if (timeStr.includes(':')) {
-            return timeStr.substring(0, 5);
-          }
-          
-          // If it's a full ISO string, parse it
-          const date = new Date(timeStr);
-          return date.toLocaleTimeString('he-IL', { 
-            hour: '2-digit', 
-            minute: '2-digit',
-            hour12: false
-          });
-        };
-        
-        const times = data.times;
-        
-        document.getElementById('alot').textContent = parseTime(times.alotHaShachar);
-        document.getElementById('sunrise').textContent = parseTime(times.sunrise);
-        document.getElementById('shema').textContent = parseTime(times.sofZmanShma);
-        document.getElementById('chatzot').textContent = parseTime(times.chatzot);
-        document.getElementById('sunset').textContent = parseTime(times.sunset);
-        document.getElementById('tzait').textContent = parseTime(times.tzeit);
-        
-        console.log('✅ Direct zmanim displayed');
-        
-      } catch (error) {
-        console.error('❌ Direct fetch also failed:', error);
-        
-        // Final fallback - calculate locally
-        calculateZmanim();
-      }
-    }
-
-    // ============= FETCH WEATHER FROM OPENWEATHERMAP API =============
-    async function fetchWeatherFromAPI() {
-      try {
-        // Check if API key is configured
-        if (!OPENWEATHER_API_KEY || OPENWEATHER_API_KEY.includes('הדבק_כאן')) {
-          console.warn('⚠️ OpenWeatherMap API key not configured, using demo data');
-          displayWeather(); // Use data from Google Sheets
-          return;
-        }
-        
-        const lat = CONFIG.location?.lat || 32.089157;
-        const lng = CONFIG.location?.lng || 34.887835;
-        
-        const url = `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lng}&appid=${OPENWEATHER_API_KEY}&units=metric&lang=he&cnt=5`;
-        
-        console.log('🌤️ Fetching weather from OpenWeatherMap...');
-        const response = await fetch(url);
-        const data = await response.json();
-        
-        if (data.cod !== '200') {
-          throw new Error(data.message);
-        }
-        
-        console.log('✅ Weather received:', data);
-        
-        // Map OpenWeather icon codes to emojis
-        const iconMap = {
-          '01d': '☀️', '01n': '🌙',
-          '02d': '⛅', '02n': '☁️',
-          '03d': '☁️', '03n': '☁️',
-          '04d': '☁️', '04n': '☁️',
-          '09d': '🌧️', '09n': '🌧️',
-          '10d': '🌦️', '10n': '🌧️',
-          '11d': '⛈️', '11n': '⛈️',
-          '13d': '🌨️', '13n': '🌨️',
-          '50d': '🌫️', '50n': '🌫️'
-        };
-        
-        // Process forecast - take every 2nd item (6 hour intervals)
-        const forecast = [];
-        for (let i = 0; i < data.list.length; i += 2) {
-          if (forecast.length >= 4) break;
-          
-          const item = data.list[i];
-          const date = new Date(item.dt * 1000);
-          
-          forecast.push({
-            day: date.toLocaleDateString('he-IL', { weekday: 'short' }),
-            time: date.toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' }),
-            icon: iconMap[item.weather[0].icon] || '🌤️',
-            temp: Math.round(item.main.temp)
+          zmanimElements.forEach((el, index) => {
+            if (displayTimes[index]) {
+              const time = new Date(displayTimes[index]);
+              const timeStr = time.toLocaleTimeString('he-IL', { 
+                hour: '2-digit', 
+                minute: '2-digit',
+                hour12: false 
+              });
+              el.textContent = timeStr;
+            }
           });
         }
-        
-        // Update weather data
-        weatherData = {
-          current: {
-            temp: Math.round(data.list[0].main.temp),
-            description: data.list[0].weather[0].description,
-            icon: iconMap[data.list[0].weather[0].icon] || '🌤️'
-          },
-          forecast: forecast
-        };
-        
-        displayWeather();
-        console.log('✅ Weather displayed');
-        
       } catch (error) {
-        console.error('❌ Error fetching weather:', error);
-        // Fallback to data from Google Sheets
-        if (weatherData) {
-          displayWeather();
-        }
+        console.error('Error fetching data:', error);
+        // Keep default values on error
       }
     }
 
-    // ============= DISPLAY FUNCTIONS =============
-    function displayWeather() {
-      if (!weatherData || !weatherData.current) return;
-      
-      let html = `
-        <div class="weather-current">
-          <div class="weather-icon">${weatherData.current.icon}</div>
-          <div>
-            <div class="weather-temp">${weatherData.current.temp}°</div>
-            <div class="weather-desc">${weatherData.current.description}</div>
-          </div>
-        </div>
-      `;
-      
-      if (weatherData.forecast && weatherData.forecast.length > 0) {
-        html += '<div class="weather-forecast">';
-        weatherData.forecast.forEach(item => {
-          html += `
-            <div class="forecast-item">
-              <div class="forecast-day">${item.day} ${item.time || ''}</div>
-              <div class="forecast-icon">${item.icon}</div>
-              <div class="forecast-temp">${item.temp}°</div>
-            </div>
-          `;
-        });
-        html += '</div>';
-      }
-      
-      document.getElementById('weatherWidget').innerHTML = html;
-    }
-
-    function displaySidebar() {
-      const html = sidebarNotices.map(n => `
-        <div class="notice-item">
-          <div class="notice-item-title">
-            <span class="notice-item-icon">${n.icon}</span>
-            ${n.title}
-          </div>
-          <div class="notice-item-text">${n.text}</div>
-        </div>
-      `).join('');
-      
-      document.getElementById('sideNotices').innerHTML = html || '<div class="loading">אין הודעות</div>';
-    }
-
-    function displayTicker() {
-      const text = tickerMessages.join(' • ');
-      document.getElementById('ticker').textContent = text + ' • ' + text;
-    }
-
-    function rotateNotice() {
-      if (centralNotices.length === 0) {
-        document.getElementById('centralNotice').innerHTML = '<div class="notice-title">אין הודעות להצגה</div>';
-        return;
-      }
-      
-      const el = document.getElementById('centralNotice');
-      el.style.opacity = '0';
-      
-      setTimeout(() => {
-        const notice = centralNotices[noticeIndex];
-        let html = '';
-        
-        if (notice.image) {
-          html += `<img src="${notice.image}" class="notice-image" alt="${notice.title}">`;
-        }
-        
-        html += `
-          <div class="notice-title">${notice.title}</div>
-          <div class="notice-content">${notice.content}</div>
-        `;
-        
-        el.innerHTML = html;
-        el.style.opacity = '1';
-        
-        noticeIndex = (noticeIndex + 1) % centralNotices.length;
-      }, 500);
-      
-      const interval = CONFIG.intervals?.centralNotice || 8000;
-      setTimeout(rotateNotice, interval);
-    }
-
-    // ============= ZMANIM CALCULATION =============
-    function calculateZmanim() {
-      const now = new Date();
-      const lat = CONFIG.location?.lat || 32.089157; // פתח תקווה
-      const lng = CONFIG.location?.lng || 34.887835;
-      
-      const rad = Math.PI / 180;
-      
-      // Calculate day of year
-      const start = new Date(now.getFullYear(), 0, 0);
-      const diff = now - start;
-      const oneDay = 1000 * 60 * 60 * 24;
-      const dayOfYear = Math.floor(diff / oneDay);
-      
-      // Solar declination
-      const declination = 23.45 * Math.sin(rad * (360 / 365.25) * (dayOfYear - 81));
-      
-      // Hour angle for sunrise/sunset
-      const cosH = (Math.sin(-0.833 * rad) - Math.sin(lat * rad) * Math.sin(declination * rad)) / 
-                   (Math.cos(lat * rad) * Math.cos(declination * rad));
-      
-      if (cosH > 1 || cosH < -1) {
-        console.warn('No sunrise/sunset today');
-        return;
-      }
-      
-      const hourAngle = Math.acos(cosH) / rad;
-      
-      // Solar noon (adjusted for longitude and equation of time)
-      const noon = 12 - lng / 15;
-      
-      // Sunrise and sunset
-      const sunrise = noon - hourAngle / 15;
-      const sunset = noon + hourAngle / 15;
-      
-      // Format time
-      const fmt = h => {
-        let hours = Math.floor(h);
-        let mins = Math.floor((h - hours) * 60);
-        
-        // Handle overflow
-        if (mins >= 60) {
-          hours += 1;
-          mins = 0;
-        }
-        if (hours >= 24) hours -= 24;
-        if (hours < 0) hours += 24;
-        
-        return `${String(hours).padStart(2, '0')}:${String(mins).padStart(2, '0')}`;
-      };
-      
-      // Calculate all zmanim
-      document.getElementById('alot').textContent = fmt(sunrise - 1.2); // 72 minutes before
-      document.getElementById('sunrise').textContent = fmt(sunrise);
-      document.getElementById('shema').textContent = fmt(sunrise + 3); // 3 hours after sunrise
-      document.getElementById('chatzot').textContent = fmt(noon);
-      document.getElementById('sunset').textContent = fmt(sunset);
-      document.getElementById('tzait').textContent = fmt(sunset + 0.75); // 45 minutes after
-      
-      console.log('✅ Zmanim calculated for:', {lat, lng, date: now.toLocaleDateString('he-IL')});
-    }
-
-    // ============= CLOCK =============
     function updateClock() {
       const now = new Date();
-      
       document.getElementById('time').textContent = now.toLocaleTimeString('he-IL', { 
-        hour: '2-digit', 
-        minute: '2-digit', 
-        second: '2-digit',
-        hour12: false 
+        hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false 
       });
-      
-      document.getElementById('dateGregorian').textContent = now.toLocaleDateString('he-IL', { 
-        weekday: 'long', 
-        year: 'numeric', 
-        month: 'long', 
-        day: 'numeric' 
+      document.getElementById('dateGreg').textContent = now.toLocaleDateString('he-IL', { 
+        weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' 
       });
     }
-
-    // ============= ERROR DISPLAY =============
-    function showError(message) {
-      document.body.innerHTML = `
-        <div class="error">
-          <h2>⚠️ שגיאה</h2>
-          <p>${message}</p>
-          <p style="margin-top: 20px; font-size: 14px;">
-            בדוק את ה-URL של Google Apps Script<br>
-            ושהרשאות מוגדרות ל-"Anyone"
-          </p>
-        </div>
-      `;
-    }
-
-    // ============= INITIALIZATION =============
-    console.log('🚀 Initializing board...');
     
-    // Start clock
+    // Initialize
     updateClock();
+    getHebrewDateAndZmanim();
+    
+    // Update clock every second
     setInterval(updateClock, 1000);
     
-    // Load data from Google Sheets
-    loadDataFromSheets();
-    
-    // Reload data every 5 minutes
-    setInterval(loadDataFromSheets, 300000);
-    
-    // Update zmanim and weather every hour
-    setInterval(() => {
-      if (CONFIG.location) {
-        fetchZmanimFromAPI();
-        fetchWeatherFromAPI();
-      }
-    }, 3600000); // Every hour
-    
-    // Update zmanim daily at midnight
-    const now = new Date();
-    const msUntilMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 0, 0, 0) - now;
-    setTimeout(() => {
-      fetchZmanimFromAPI();
-      // Then update daily
-      setInterval(fetchZmanimFromAPI, 86400000);
-    }, msUntilMidnight);
-    
-    console.log('✅ Board initialized');
+    // Update Hebrew date and zmanim once per hour
+    setInterval(getHebrewDateAndZmanim, 60 * 60 * 1000);
   </script>
 </body>
 </html>
