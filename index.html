@@ -497,7 +497,8 @@
     const OPENWEATHER_API_KEY = 'd6c0e81f9f6033ab44966be36d3d865f';
     
     // Google Apps Script Web App URL - Replace with your deployed URL
-    const SHEETS_API_URL = 'https://script.google.com/macros/s/YOUR_URL/exec';
+    const SHEETS_API_URL = 'https://script.google.com/macros/s/AKfycbyeTnLiNB0edvktOLCMv4EzEc7MmrkQBQKgWcpURVIDYesr8cSHci_k6CpgkKHIep2aDg/exec';
+
     async function loadConfigFromSheets() {
       try {
         console.log('📊 Loading config from Google Sheets...');
@@ -509,6 +510,7 @@
           return;
         }
         
+        // Update location and building name
         if (data.config) {
           // Update building name
           if (data.config.buildingName) {
@@ -530,9 +532,56 @@
             getHebrewDateAndZmanim();
             getShabbatTimes();
           }
-          
-          console.log('✅ Config loaded successfully');
         }
+        
+        // Update central notice
+        if (data.central && data.central.length > 0) {
+          const centralNotice = data.central[0];
+          const noticeTitle = document.querySelector('.notice-title');
+          const noticeContent = document.querySelector('.notice-content');
+          
+          if (noticeTitle) {
+            noticeTitle.innerHTML = centralNotice.title;
+          }
+          if (noticeContent) {
+            noticeContent.innerHTML = centralNotice.content;
+          }
+          console.log('📰 Central notice updated');
+        }
+        
+        // Update sidebar notices
+        if (data.sidebar && data.sidebar.length > 0) {
+          const sidebarSection = document.querySelector('.sidebar-section.card');
+          if (sidebarSection) {
+            // Get the h3 title
+            const h3 = sidebarSection.querySelector('h3');
+            
+            // Clear and rebuild
+            sidebarSection.innerHTML = '';
+            if (h3) {
+              sidebarSection.appendChild(h3);
+            } else {
+              const newH3 = document.createElement('h3');
+              newH3.textContent = '📢 הודעות לדיירים';
+              sidebarSection.appendChild(newH3);
+            }
+            
+            // Add notices from sheet
+            data.sidebar.forEach(notice => {
+              const noticeDiv = document.createElement('div');
+              noticeDiv.className = 'notice-item';
+              noticeDiv.innerHTML = `
+                <div class="notice-item-title">${notice.icon} ${notice.title}</div>
+                <div>${notice.text}</div>
+              `;
+              sidebarSection.appendChild(noticeDiv);
+            });
+            
+            console.log('📋 Sidebar notices updated');
+          }
+        }
+        
+        console.log('✅ Config loaded successfully');
       } catch (error) {
         console.error('❌ Error loading config from Sheets:', error);
         console.log('ℹ️ Using default values');
