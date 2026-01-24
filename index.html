@@ -352,39 +352,15 @@
       <div class="right-sidebar">
         <div class="sidebar-section card">
           <h3>📢 הודעות לדיירים</h3>
-          <div class="notice-item">
-            <div class="notice-item-title">🕐 שעות פעילות מעלית</div>
-            <div>24/7</div>
-          </div>
-          <div class="notice-item">
-            <div class="notice-item-title">📬 איסוף דואר</div>
-            <div>א׳-ה׳ 08:00-17:00</div>
-          </div>
-          <div class="notice-item">
-            <div class="notice-item-title">💰 גביית ארנונה</div>
-            <div>עד ה-10 לחודש</div>
-          </div>
-          <div class="notice-item">
-            <div class="notice-item-title">☎️ מספר חירום</div>
-            <div>שומר: 050-1234567</div>
-          </div>
-          <div class="notice-item">
-            <div class="notice-item-title">🔧 תחזוקה</div>
-            <div>יצחק: 052-9876543</div>
-          </div>
+          <!-- Notices will be loaded from Google Sheets -->
         </div>
       </div>
 
       <!-- Center: Main Notice + Weather -->
       <div>
         <div class="card central-notice">
-          <div class="notice-title">♻️ מה שייכים לפח הכתום?</div>
-          <div class="notice-content">
-            אריזות ריקות בלבד:<br>
-            • אריזות מזון 🥫<br>
-            • אריזות משקה 🧃<br>
-            • אריזות שקשוק 🧴
-          </div>
+          <div class="notice-title" id="centralTitle">טוען...</div>
+          <div class="notice-content" id="centralContent">טוען נתונים מהשרת...</div>
         </div>
 
         <!-- Weather Section -->
@@ -496,13 +472,42 @@
     let buildingName = 'בניין תמר';
     const OPENWEATHER_API_KEY = 'd6c0e81f9f6033ab44966be36d3d865f';
     
-    // Google Apps Script Web App URL - Replace with your deployed URL
+    // Central notice rotation
+    let centralNotices = [];
+    let currentCentralIndex = 0;
+    let centralInterval = 10000; // Default: 10 seconds between notices
+    let tickerInterval = 300000; // Default: 5 minutes (300 seconds) between Sheets updates
+    
+    // Google Apps Script Web App URL
     const SHEETS_API_URL = 'https://script.google.com/macros/s/AKfycbyeTnLiNB0edvktOLCMv4EzEc7MmrkQBQKgWcpURVIDYesr8cSHci_k6CpgkKHIep2aDg/exec';
+
+    function rotateCentralNotice() {
+      if (centralNotices.length === 0) return;
+      
+      const notice = centralNotices[currentCentralIndex];
+      const noticeTitle = document.getElementById('centralTitle');
+      const noticeContent = document.getElementById('centralContent');
+      
+      if (noticeTitle && notice.title) {
+        noticeTitle.innerHTML = notice.title;
+      }
+      if (noticeContent && notice.content) {
+        noticeContent.innerHTML = notice.content;
+      }
+      
+      // Move to next notice
+      currentCentralIndex = (currentCentralIndex + 1) % centralNotices.length;
+    }
 
     async function loadConfigFromSheets() {
       try {
         console.log('📊 Loading config from Google Sheets...');
         const response = await fetch(SHEETS_API_URL);
+        
+        if (!response.ok) {
+          throw new Error('Network error');
+        }
+        
         const data = await response.json();
         
         if (data.error) {
@@ -532,21 +537,52 @@
             getHebrewDateAndZmanim();
             getShabbatTimes();
           }
+          
+          // Update central interval if provided
+          if (data.config.centralInterval) {
+            centralInterval = data.config.centralInterval * 1000; // Convert to milliseconds
+            console.log('⏱️ Central interval updated:', centralInterval / 1000, 'seconds');
+            
+            // Restart the rotation with new interval
+            if (window.centralRotationInterval) {
+              clearInterval(window.centralRotationInterval);
+            }
+            if (centralNotices.length > 1) {
+              window.centralRotationInterval = setInterval(rotateCentralNotice, centralInterval);
+            }
+          }
+          
+          // Update ticker interval if provided
+          if (data.config.tickerInterval) {
+            tickerInterval = data.config.tickerInterval * 1000; // Convert to milliseconds
+            console.log('🔄 Ticker interval updated:', tickerInterval / 1000, 'seconds');
+            
+            // Restart the ticker with new interval
+            if (window.sheetsUpdateInterval) {
+              clearInterval(window.sheetsUpdateInterval);
+            }
+            window.sheetsUpdateInterval = setInterval(loadConfigFromSheets, tickerInterval);
+          }
         }
         
-        // Update central notice
+        // Update central notices (support multiple notices)
         if (data.central && data.central.length > 0) {
-          const centralNotice = data.central[0];
-          const noticeTitle = document.querySelector('.notice-title');
-          const noticeContent = document.querySelector('.notice-content');
+          centralNotices = data.central;
+          currentCentralIndex = 0;
           
-          if (noticeTitle) {
-            noticeTitle.innerHTML = centralNotice.title;
+          // Display first notice immediately
+          rotateCentralNotice();
+          
+          // Start rotation if multiple notices
+          if (centralNotices.length > 1) {
+            if (window.centralRotationInterval) {
+              clearInterval(window.centralRotationInterval);
+            }
+            window.centralRotationInterval = setInterval(rotateCentralNotice, centralInterval);
+            console.log(`📰 Central notice rotation started (${centralNotices.length} notices, ${centralInterval / 1000}s interval)`);
+          } else {
+            console.log('📰 Single central notice updated');
           }
-          if (noticeContent) {
-            noticeContent.innerHTML = centralNotice.content;
-          }
-          console.log('📰 Central notice updated');
         }
         
         // Update sidebar notices
@@ -584,7 +620,30 @@
         console.log('✅ Config loaded successfully');
       } catch (error) {
         console.error('❌ Error loading config from Sheets:', error);
-        console.log('ℹ️ Using default values');
+        console.log('ℹ️ Using default values / offline mode');
+        
+        // Set default offline message for central notice
+        const noticeTitle = document.getElementById('centralTitle');
+        const noticeContent = document.getElementById('centralContent');
+        
+        if (noticeTitle && noticeTitle.textContent === 'טוען...') {
+          noticeTitle.textContent = '📡 אין חיבור';
+        }
+        if (noticeContent && noticeContent.textContent === 'טוען נתונים מהשרת...') {
+          noticeContent.textContent = 'הלוח פועל במצב לא מקוון';
+        }
+        
+        // Add default notice to sidebar if empty
+        const sidebarSection = document.querySelector('.sidebar-section.card');
+        if (sidebarSection && sidebarSection.children.length <= 1) {
+          const noticeDiv = document.createElement('div');
+          noticeDiv.className = 'notice-item';
+          noticeDiv.innerHTML = `
+            <div class="notice-item-title">📡 מצב לא מקוון</div>
+            <div>הנתונים יעודכנו כשהחיבור יחזור</div>
+          `;
+          sidebarSection.appendChild(noticeDiv);
+        }
       }
     }
 
@@ -607,6 +666,11 @@
       try {
         const weatherUrl = `https://api.openweathermap.org/data/2.5/forecast?lat=${latitude}&lon=${longitude}&units=metric&appid=${OPENWEATHER_API_KEY}&lang=he`;
         const response = await fetch(weatherUrl);
+        
+        if (!response.ok) {
+          throw new Error('Network error');
+        }
+        
         const data = await response.json();
         
         if (data.list && data.list.length > 0) {
@@ -652,6 +716,33 @@
         }
       } catch (error) {
         console.error('Error fetching weather:', error);
+        // Show default -- values when offline
+        const weatherContainer = document.getElementById('weatherHourly');
+        weatherContainer.innerHTML = '';
+        
+        const hours = ['עכשיו', '+3h', '+6h', '+9h', '+12h', '+15h'];
+        hours.forEach(timeLabel => {
+          const card = document.createElement('div');
+          card.className = 'weather-hour-card';
+          card.innerHTML = `
+            <div class="weather-hour-time">${timeLabel}</div>
+            <div class="weather-hour-icon">🌤️</div>
+            <div class="weather-hour-details">
+              <div class="weather-detail-row">
+                <span>--°</span>
+              </div>
+              <div class="weather-detail-row">
+                <span>💨</span>
+                <span>-- קמ"ש</span>
+              </div>
+              <div class="weather-detail-row">
+                <span>💧</span>
+                <span>--%</span>
+              </div>
+            </div>
+          `;
+          weatherContainer.appendChild(card);
+        });
       }
     }
 
@@ -664,18 +755,26 @@
         
         console.log('📅 Fetching for:', `${year}-${month}-${day}`, 'Location:', latitude, longitude);
         
+        // Get Hebrew date for today
         const dateUrl = `https://www.hebcal.com/converter?cfg=json&gy=${year}&gm=${month}&gd=${day}&g2h=1`;
         const dateResponse = await fetch(dateUrl);
-        const dateData = await dateResponse.json();
         
-        if (dateData.hebrew) {
-          document.getElementById('dateHebrew').textContent = dateData.hebrew;
+        if (!dateResponse.ok) {
+          throw new Error('Network error');
         }
+        
+        const dateData = await dateResponse.json();
 
+        // Get zmanim for today
         const zmanimUrl = `https://www.hebcal.com/zmanim?cfg=json&latitude=${latitude}&longitude=${longitude}&date=${year}-${month}-${day}`;
         console.log('🔗 URL:', zmanimUrl);
         
         const zmanimResponse = await fetch(zmanimUrl);
+        
+        if (!zmanimResponse.ok) {
+          throw new Error('Network error');
+        }
+        
         const zmanimData = await zmanimResponse.json();
         
         if (zmanimData.times) {
@@ -687,6 +786,36 @@
             beinHaShmashos: times.beinHaShmashos,
             tzeit: times.tzeit
           });
+          
+          // Check if we're after tzeit (צאת הכוכבים)
+          const tzeitTime = new Date(times.beinHaShmashos || times.tzeit);
+          const currentTime = new Date();
+          
+          let hebrewDateToShow = dateData.hebrew;
+          
+          if (currentTime > tzeitTime) {
+            // We're after tzeit, show tomorrow's Hebrew date
+            console.log('🌙 After tzeit - showing tomorrow\'s Hebrew date');
+            
+            const tomorrow = new Date(now);
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            const tomorrowYear = tomorrow.getFullYear();
+            const tomorrowMonth = String(tomorrow.getMonth() + 1).padStart(2, '0');
+            const tomorrowDay = String(tomorrow.getDate()).padStart(2, '0');
+            
+            const tomorrowDateUrl = `https://www.hebcal.com/converter?cfg=json&gy=${tomorrowYear}&gm=${tomorrowMonth}&gd=${tomorrowDay}&g2h=1`;
+            const tomorrowDateResponse = await fetch(tomorrowDateUrl);
+            const tomorrowDateData = await tomorrowDateResponse.json();
+            
+            if (tomorrowDateData.hebrew) {
+              hebrewDateToShow = tomorrowDateData.hebrew;
+            }
+          }
+          
+          // Display the Hebrew date
+          if (hebrewDateToShow) {
+            document.getElementById('dateHebrew').textContent = hebrewDateToShow;
+          }
           
           const zmanimElements = document.querySelectorAll('.zman-time');
           
@@ -721,6 +850,16 @@
         }
       } catch (error) {
         console.error('❌ Error fetching data:', error);
+        // Set all zmanim to -- when offline
+        const zmanimElements = document.querySelectorAll('.zman-time');
+        zmanimElements.forEach(el => {
+          el.textContent = '--:--';
+        });
+        // Keep the Hebrew date as is or show --
+        const hebrewDateEl = document.getElementById('dateHebrew');
+        if (hebrewDateEl.textContent === 'כ"ב שבט התשפ"ו') {
+          hebrewDateEl.textContent = '--';
+        }
       }
     }
 
@@ -736,6 +875,11 @@
         console.log('🕯️ Shabbat URL:', shabbatUrl);
         
         const response = await fetch(shabbatUrl);
+        
+        if (!response.ok) {
+          throw new Error('Network error');
+        }
+        
         const data = await response.json();
         
         if (data.items && data.items.length > 0) {
@@ -781,7 +925,10 @@
         }
       } catch (error) {
         console.error('❌ Error fetching Shabbat times:', error);
+        // Set default values when offline
         document.getElementById('parashaName').textContent = 'זמני שבת';
+        document.getElementById('shabbatCandles').textContent = '--:--';
+        document.getElementById('shabbatEnd').textContent = '--:--';
       }
     }
 
@@ -807,7 +954,7 @@
     setInterval(getHebrewDateAndZmanim, 60 * 60 * 1000);
     setInterval(getShabbatTimes, 60 * 60 * 1000);
     setInterval(updateWeather, 30 * 60 * 1000);
-    setInterval(loadConfigFromSheets, 5 * 60 * 1000); // Reload config every 5 minutes
+    window.sheetsUpdateInterval = setInterval(loadConfigFromSheets, tickerInterval); // Reload config based on tickerInterval setting
   </script>
 </body>
 </html>
