@@ -43,7 +43,7 @@
       position: absolute;
       top: 10px;
       right: 10px;
-      font-size: 14px;
+      font-size: 18px;
       color: rgba(255,255,255,0.9);
       font-weight: 600;
     }
@@ -192,7 +192,7 @@
     }
 
     .weather-hour-time {
-      font-size: 16px;
+      font-size: 26px;
       font-weight: 700;
       color: #1976d2;
     }
@@ -203,7 +203,7 @@
     }
 
     .weather-hour-details {
-      font-size: 13px;
+      font-size: 20px;
       color: #555;
       display: flex;
       flex-direction: column;
@@ -225,7 +225,7 @@
     }
 
     .zmanim-card h3 {
-      font-size: 16px;
+      font-size: 26px;
       color: #e65100;
       margin-bottom: 15px;
       display: flex;
@@ -238,7 +238,7 @@
     }
 
     .shabbat-card h3 {
-      font-size: 16px;
+      font-size: 26px;
       color: #3f51b5;
       margin-bottom: 15px;
       display: flex;
@@ -258,12 +258,12 @@
     }
 
     .zman-label {
-      font-size: 13px;
+      font-size: 20px;
       color: #666;
     }
 
     .zman-time {
-      font-size: 14px;
+      font-size: 20px;
       font-weight: 700;
       color: #e65100;
     }
@@ -275,25 +275,25 @@
       justify-content: center;
       align-items: center;
       text-align: center;
-      min-height: 280px;
+      min-height: 550px;
       margin-bottom: 15px;
     }
 
     .notice-title {
-      font-size: 32px;
+      font-size: 50px;
       font-weight: 700;
       color: #667eea;
       margin-bottom: 15px;
     }
 
     .notice-content {
-      font-size: 20px;
+      font-size: 40px;
       color: #444;
       line-height: 1.5;
     }
 
     .sidebar-section h3 {
-      font-size: 18px;
+      font-size: 26px;
       color: #764ba2;
       margin-bottom: 15px;
       padding-bottom: 10px;
@@ -301,7 +301,7 @@
     }
 
     .notice-item {
-      padding: 10px;
+      padding: 20px;
       background: #f8f9fa;
       border-radius: 8px;
       margin-bottom: 10px;
@@ -309,8 +309,13 @@
     }
 
     .notice-item-title {
+	  font-size: 24px;
       font-weight: 600;
       margin-bottom: 5px;
+    }
+	
+	.notice-item div:last-child {
+    font-size: 22px;
     }
 
     /* Footer */
@@ -319,7 +324,7 @@
       color: white;
       padding: 15px;
       text-align: center;
-      font-size: 18px;
+      font-size: 22px;
     }
   </style>
 </head>
@@ -366,7 +371,6 @@
         <!-- Weather Section -->
         <div class="weather-section">
           <div class="weather-container">
-            <h3 class="weather-title">🌤️ תחזית שעתית</h3>
             <div class="weather-hourly" id="weatherHourly">
               <div class="weather-hour-card">
                 <div class="weather-hour-time">טוען...</div>
@@ -460,8 +464,8 @@
     </div>
 
     <!-- Footer -->
-    <div class="footer">
-      שמירה על הניקיון במרחבים המשותפים - תודה רבה! 🧹
+    <div class="footer" id="footerText">
+      טוען...
     </div>
   </div>
 
@@ -477,6 +481,11 @@
     let currentCentralIndex = 0;
     let centralInterval = 10000; // Default: 10 seconds between notices
     let tickerInterval = 300000; // Default: 5 minutes (300 seconds) between Sheets updates
+    
+    // Footer rotation
+    let footerMessages = [];
+    let currentFooterIndex = 0;
+    let footerInterval = 10000; // Default: 10 seconds between footer messages
     
     // Google Apps Script Web App URL
     const SHEETS_API_URL = 'https://script.google.com/macros/s/AKfycbyeTnLiNB0edvktOLCMv4EzEc7MmrkQBQKgWcpURVIDYesr8cSHci_k6CpgkKHIep2aDg/exec';
@@ -497,6 +506,20 @@
       
       // Move to next notice
       currentCentralIndex = (currentCentralIndex + 1) % centralNotices.length;
+    }
+
+    function rotateFooter() {
+      if (footerMessages.length === 0) return;
+      
+      const message = footerMessages[currentFooterIndex];
+      const footerEl = document.getElementById('footerText');
+      
+      if (footerEl && message) {
+        footerEl.textContent = message;
+      }
+      
+      // Move to next message
+      currentFooterIndex = (currentFooterIndex + 1) % footerMessages.length;
     }
 
     async function loadConfigFromSheets() {
@@ -563,12 +586,56 @@
             }
             window.sheetsUpdateInterval = setInterval(loadConfigFromSheets, tickerInterval);
           }
+          
+          // Update footer interval if provided
+          if (data.config.footerInterval) {
+            footerInterval = data.config.footerInterval * 1000;
+            console.log('⏱️ Footer interval updated:', footerInterval / 1000, 'seconds');
+            
+            // Restart footer rotation with new interval
+            if (window.footerRotationInterval) {
+              clearInterval(window.footerRotationInterval);
+            }
+            if (footerMessages.length > 1) {
+              window.footerRotationInterval = setInterval(rotateFooter, footerInterval);
+            }
+          }
+        }
+        
+        // Update footer messages (support multiple messages)
+        if (data.footer && data.footer.length > 0) {
+          footerMessages = data.footer;
+          currentFooterIndex = 0;
+          
+          console.log(`🦶 Loaded ${footerMessages.length} footer message(s):`, footerMessages);
+          
+          // Display first message immediately
+          rotateFooter();
+          
+          // Start rotation if multiple messages
+          if (footerMessages.length > 1) {
+            if (window.footerRotationInterval) {
+              clearInterval(window.footerRotationInterval);
+            }
+            window.footerRotationInterval = setInterval(rotateFooter, footerInterval);
+            console.log(`🔄 Footer rotation started (${footerMessages.length} messages, ${footerInterval / 1000}s interval)`);
+          } else {
+            console.log('ℹ️ Single footer message - no rotation needed');
+          }
+        } else {
+          // Default footer message if none provided
+          const footerEl = document.getElementById('footerText');
+          if (footerEl && footerEl.textContent === 'טוען...') {
+            footerEl.textContent = 'שמירה על הניקיון במרחבים המשותפים - תודה רבה! 🧹';
+          }
         }
         
         // Update central notices (support multiple notices)
         if (data.central && data.central.length > 0) {
           centralNotices = data.central;
           currentCentralIndex = 0;
+          
+          console.log(`📰 Loaded ${centralNotices.length} central notice(s):`, centralNotices);
           
           // Display first notice immediately
           rotateCentralNotice();
@@ -579,9 +646,9 @@
               clearInterval(window.centralRotationInterval);
             }
             window.centralRotationInterval = setInterval(rotateCentralNotice, centralInterval);
-            console.log(`📰 Central notice rotation started (${centralNotices.length} notices, ${centralInterval / 1000}s interval)`);
+            console.log(`🔄 Central notice rotation started (${centralNotices.length} notices, ${centralInterval / 1000}s interval)`);
           } else {
-            console.log('📰 Single central notice updated');
+            console.log('ℹ️ Single central notice - no rotation needed');
           }
         }
         
