@@ -150,7 +150,7 @@
     /* Main Content */
     .main-content {
       display: grid;
-      grid-template-columns: minmax(250px, 1fr) minmax(400px, 2.5fr) minmax(250px, 1fr);
+      grid-template-columns: minmax(250px, 1.5fr) minmax(400px, 2.5fr) minmax(250px, 1fr);
       gap: clamp(10px, 1.5vw, 15px);
       padding: clamp(10px, 1.5vw, 15px);
       overflow: hidden;
@@ -221,6 +221,7 @@
     .weather-hour-time {
       font-size: clamp(18px, 2.5vw, 26px);
       font-weight: 700;
+      color: #1976d2;
     }
 
     .weather-hour-main {
@@ -307,32 +308,37 @@
     }
 
     .central-notice {
-      background: linear-gradient(135deg, #fff5e6, #ffe6f0);
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      text-align: center;
-      min-height: clamp(350px, 45vh, 600px);
-      max-height: clamp(400px, 50vh, 650px);
+      position: relative;
+      width: 100%;
       margin-bottom: clamp(10px, 1.5vw, 15px);
       overflow: hidden;
-      padding: clamp(15px, 2vw, 25px);
+      background: transparent; /* או מה שאתה רוצה */
+      border-radius: clamp(8px, 1vw, 12px);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      padding: 0;
     }
 
-    .notice-title {
-      font-size: clamp(28px, 5vw, 50px);
-      font-weight: 700;
-      color: #667eea;
-      margin-bottom: clamp(8px, 1vw, 12px);
-      line-height: 1.2;
+    .central-notice-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: opacity 0.5s ease;
     }
 
-    .notice-content {
-      font-size: clamp(22px, 4vw, 40px);
-      color: #444;
-      line-height: 1.4;
-      padding: 0 clamp(10px, 1.5vw, 15px);
+    .central-notice-img.hidden {
+      opacity: 0;
+    }
+
+    .central-notice-placeholder {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: clamp(20px, 3vw, 36px);
+      color: rgba(255,255,255,0.4);
+      background: linear-gradient(135deg, #1a1a2e, #16213e);
     }
 
     .sidebar-section h3 {
@@ -481,9 +487,9 @@
 
       <!-- Center: Main Notice + Weather -->
       <div style="display: flex; flex-direction: column; height: 100%; overflow-y: auto; overflow-x: hidden;">
-        <div class="card central-notice">
-          <div class="notice-title" id="centralTitle">טוען...</div>
-          <div class="notice-content" id="centralContent">טוען נתונים מהשרת...</div>
+        <div class="central-notice">
+          <div class="central-notice-placeholder" id="centralPlaceholder">🖼️ טוען תמונה...</div>
+          <img class="central-notice-img hidden" id="centralImg" src="" alt="">
         </div>
 
         <!-- Weather Section -->
@@ -612,14 +618,27 @@
       if (centralNotices.length === 0) return;
 
       const notice = centralNotices[currentCentralIndex];
-      const noticeTitle = document.getElementById('centralTitle');
-      const noticeContent = document.getElementById('centralContent');
+      const img = document.getElementById('centralImg');
+      const placeholder = document.getElementById('centralPlaceholder');
 
-      if (noticeTitle && notice.title) {
-        noticeTitle.innerHTML = notice.title;
-      }
-      if (noticeContent && notice.content) {
-        noticeContent.innerHTML = notice.content;
+      if (img && notice.content) {
+        img.classList.add('hidden');
+
+        const newImg = new Image();
+        newImg.onload = () => {
+          img.src = notice.content;
+          img.alt = notice.title || '';
+          if (placeholder) placeholder.style.display = 'none';
+          img.classList.remove('hidden');
+        };
+        newImg.onerror = () => {
+          if (placeholder) {
+            placeholder.style.display = 'flex';
+            placeholder.textContent = '⚠️ לא ניתן לטעון תמונה';
+          }
+          img.classList.add('hidden');
+        };
+        newImg.src = notice.content;
       }
 
       currentCentralIndex = (currentCentralIndex + 1) % centralNotices.length;
@@ -659,12 +678,7 @@
         });
       }
 
-      if (styles.centralBgColor && styles.centralBgColor2) {
-        const central = document.querySelector('.central-notice');
-        if (central) {
-          central.style.background = `linear-gradient(135deg, ${styles.centralBgColor}, ${styles.centralBgColor2})`;
-        }
-      }
+      // central-notice is now an image container, no background override needed
 
       if (styles.weatherBgColor) {
         document.documentElement.style.setProperty('--weather-bg', styles.weatherBgColor);
@@ -723,6 +737,16 @@
             const buildingLabel = document.querySelector('.building-label span');
             if (buildingLabel) {
               buildingLabel.innerHTML = `בניין <br>${buildingName.replace('בניין ', '')}`;
+            }
+          }
+
+          // Load building logo if provided
+          if (data.config.buildingLogo) {
+            const logoImg = document.querySelector('.building-label-logo');
+            if (logoImg) {
+              logoImg.src = data.config.buildingLogo;
+              logoImg.classList.add('loaded');
+              console.log('🖼️ Building logo loaded:', data.config.buildingLogo);
             }
           }
 
@@ -851,14 +875,10 @@
         console.error('❌ Error loading config from Sheets:', error);
         console.log('ℹ️ Using default values / offline mode');
 
-        const noticeTitle = document.getElementById('centralTitle');
-        const noticeContent = document.getElementById('centralContent');
-
-        if (noticeTitle && noticeTitle.textContent === 'טוען...') {
-          noticeTitle.textContent = '📡 אין חיבור';
-        }
-        if (noticeContent && noticeContent.textContent === 'טוען נתונים מהשרת...') {
-          noticeContent.textContent = 'הלוח פועל במצב לא מקוון';
+        const placeholder = document.getElementById('centralPlaceholder');
+        if (placeholder) {
+          placeholder.style.display = 'flex';
+          placeholder.textContent = '📡 אין חיבור - מצב לא מקוון';
         }
 
         const sidebarSection = document.querySelector('.sidebar-section.card');
