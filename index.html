@@ -147,6 +147,7 @@
       opacity: 0.9;
     }
 
+
     /* Main Content */
     .main-content {
       display: grid;
@@ -310,9 +311,10 @@
     .central-notice {
       position: relative;
       width: 100%;
+      aspect-ratio: 16 / 9;
       margin-bottom: clamp(10px, 1.5vw, 15px);
       overflow: hidden;
-      background: transparent; /* או מה שאתה רוצה */
+      background: #111;
       border-radius: clamp(8px, 1vw, 12px);
       box-shadow: 0 2px 8px rgba(0,0,0,0.1);
       padding: 0;
@@ -602,9 +604,11 @@
 
     // Central notice rotation
     let centralNotices = [];
+    let centralImages = [];      // תמונות מתיקיית Drive
     let currentCentralIndex = 0;
     let centralInterval = 10000;
     let tickerInterval = 300000;
+    let useDriveImages = false;
 
     // Footer rotation
     let footerMessages = [];
@@ -612,36 +616,45 @@
     let footerInterval = 10000;
 
     // Google Apps Script Web App URL
-    const SHEETS_API_URL = 'https://script.google.com/macros/s/AKfycbyeTnLiNB0edvktOLCMv4EzEc7MmrkQBQKgWcpURVIDYesr8cSHci_k6CpgkKHIep2aDg/exec';
+    const SHEETS_API_URL = 'https://script.google.com/macros/s/AKfycbw9vJ_ISQGXy3Hlz1fhhGPTUa6yPZUpMJIHFdKT-vZudHOB4awR-5Mw6XI32zwh7oob/exec';
 
     function rotateCentralNotice() {
-      if (centralNotices.length === 0) return;
-
-      const notice = centralNotices[currentCentralIndex];
       const img = document.getElementById('centralImg');
       const placeholder = document.getElementById('centralPlaceholder');
 
-      if (img && notice.content) {
-        img.classList.add('hidden');
-
-        const newImg = new Image();
-        newImg.onload = () => {
-          img.src = notice.content;
-          img.alt = notice.title || '';
-          if (placeholder) placeholder.style.display = 'none';
-          img.classList.remove('hidden');
-        };
-        newImg.onerror = () => {
-          if (placeholder) {
-            placeholder.style.display = 'flex';
-            placeholder.textContent = '⚠️ לא ניתן לטעון תמונה';
-          }
-          img.classList.add('hidden');
-        };
-        newImg.src = notice.content;
+      // מצב 1: תמונות מתיקיית Drive
+      if (useDriveImages && centralImages.length > 0) {
+        const imageUrl = centralImages[currentCentralIndex].url;
+        loadCentralImage(imageUrl, img, placeholder);
+        currentCentralIndex = (currentCentralIndex + 1) % centralImages.length;
+        return;
       }
 
+      // מצב 2: URL ידני מהגיליון
+      if (centralNotices.length === 0) return;
+      const notice = centralNotices[currentCentralIndex];
+      if (notice.content) {
+        loadCentralImage(notice.content, img, placeholder);
+      }
       currentCentralIndex = (currentCentralIndex + 1) % centralNotices.length;
+    }
+
+    function loadCentralImage(url, img, placeholder) {
+      img.classList.add('hidden');
+      const newImg = new Image();
+      newImg.onload = () => {
+        img.src = url;
+        if (placeholder) placeholder.style.display = 'none';
+        img.classList.remove('hidden');
+      };
+      newImg.onerror = () => {
+        if (placeholder) {
+          placeholder.style.display = 'flex';
+          placeholder.textContent = '⚠️ לא ניתן לטעון תמונה';
+        }
+        img.classList.add('hidden');
+      };
+      newImg.src = url;
     }
 
     function rotateFooter() {
@@ -820,10 +833,12 @@
         }
 
         if (data.central && data.central.length > 0) {
+          // עדיפות ראשונה: URL ידני מגיליון central
           centralNotices = data.central;
+          useDriveImages = false;
           currentCentralIndex = 0;
 
-          console.log(`📰 Loaded ${centralNotices.length} central notice(s):`, centralNotices);
+          console.log(`📰 Loaded ${centralNotices.length} central notice(s) — using manual URLs`);
 
           rotateCentralNotice();
 
@@ -832,9 +847,22 @@
               clearInterval(window.centralRotationInterval);
             }
             window.centralRotationInterval = setInterval(rotateCentralNotice, centralInterval);
-            console.log(`🔄 Central notice rotation started (${centralNotices.length} notices, ${centralInterval / 1000}s interval)`);
-          } else {
-            console.log('ℹ️ Single central notice - no rotation needed');
+          }
+        } else if (data.images && data.images.length > 0) {
+          // עדיפות שנייה: תמונות מתיקיית Drive
+          centralImages = data.images;
+          useDriveImages = true;
+          currentCentralIndex = 0;
+
+          console.log(`🖼️ No manual URLs — loaded ${centralImages.length} images from Drive folder`);
+
+          rotateCentralNotice();
+
+          if (centralImages.length > 1) {
+            if (window.centralRotationInterval) {
+              clearInterval(window.centralRotationInterval);
+            }
+            window.centralRotationInterval = setInterval(rotateCentralNotice, centralInterval);
           }
         }
 
@@ -855,9 +883,10 @@
             data.sidebar.forEach(notice => {
               const noticeDiv = document.createElement('div');
               noticeDiv.className = 'notice-item';
+              const formattedText = (notice.text || '').replace(/\n/g, '<br>');
               noticeDiv.innerHTML = `
                 <div class="notice-item-title">${notice.icon} ${notice.title}</div>
-                <div>${notice.text}</div>
+                <div>${formattedText}</div>
               `;
               sidebarSection.appendChild(noticeDiv);
             });
@@ -1147,7 +1176,7 @@
           }
 
           if (parashaName) {
-            document.getElementById('parashaName').textContent = `${parashaName}`;
+            document.getElementById('parashaName').textContent = `פרשת ${parashaName}`;
           } else {
             document.getElementById('parashaName').textContent = 'זמני שבת';
           }
