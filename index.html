@@ -606,9 +606,9 @@
     let centralNotices = [];
     let centralImages = [];      // תמונות מתיקיית Drive
     let currentCentralIndex = 0;
-    let centralInterval = 10000;
-    let centralNextAt = null;
-    let centralLastRotatedDate = null;
+    let centralInterval = 10000;  // במצב שניות
+    let centralNextAt = null;     // במצב שעה — "HH:MM"
+    let centralLastRotatedDate = null; // תאריך+שעה אחרון שהוחלף
     let tickerInterval = 300000;
     let useDriveImages = false;
 
@@ -618,7 +618,7 @@
     let footerInterval = 10000;
 
     // Google Apps Script Web App URL
-    const SHEETS_API_URL = 'https://script.google.com/macros/s/AKfycbw9vJ_ISQGXy3Hlz1fhhGPTUa6yPZUpMJIHFdKT-vZudHOB4awR-5Mw6XI32zwh7oob/exec';
+    const SHEETS_API_URL = 'https://script.google.com/macros/s/AKfycbyeTnLiNB0edvktOLCMv4EzEc7MmrkQBQKgWcpURVIDYesr8cSHci_k6CpgkKHIep2aDg/exec';
 
     function rotateCentralNotice() {
       const img = document.getElementById('centralImg');
@@ -658,31 +658,38 @@
       };
       newImg.src = url;
     }
+
     function setupCentralRotation(count) {
       if (window.centralRotationInterval) clearInterval(window.centralRotationInterval);
       if (window.centralTimeCheckInterval) clearInterval(window.centralTimeCheckInterval);
-    
+
       if (!centralNextAt) {
+        // מצב שניות — interval רגיל
         if (count > 1) {
           window.centralRotationInterval = setInterval(rotateCentralNotice, centralInterval);
+          console.log(`🔄 Central rotation: every ${centralInterval / 1000}s`);
         }
       } else {
+        // מצב שעה — בודק כל דקה
         window.centralTimeCheckInterval = setInterval(checkCentralTimeRotation, 60000);
+        console.log(`🕐 Central rotation: daily at ${centralNextAt}`);
       }
     }
 
-function checkCentralTimeRotation() {
-  if (!centralNextAt) return;
-  const now = new Date();
-  const currentTime = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
-  const todayKey = `${now.toDateString()}_${centralNextAt}`;
-  if (currentTime === centralNextAt && centralLastRotatedDate !== todayKey) {
-    centralLastRotatedDate = todayKey;
-    rotateCentralNotice();
-  }
-}
-      
-    
+    function checkCentralTimeRotation() {
+      if (!centralNextAt) return;
+      const now = new Date();
+      const hh = String(now.getHours()).padStart(2, '0');
+      const mm = String(now.getMinutes()).padStart(2, '0');
+      const currentTime = `${hh}:${mm}`;
+      const todayKey = `${now.toDateString()}_${centralNextAt}`;
+
+      if (currentTime === centralNextAt && centralLastRotatedDate !== todayKey) {
+        centralLastRotatedDate = todayKey;
+        rotateCentralNotice();
+        console.log(`🕐 Time-based rotation triggered at ${currentTime}`);
+      }
+    }
 
     function rotateFooter() {
       if (footerMessages.length === 0) return;
@@ -803,19 +810,15 @@ function checkCentralTimeRotation() {
           if (data.config.centralInterval) {
             const raw = String(data.config.centralInterval).trim();
             if (/^\d{1,2}:\d{2}$/.test(raw)) {
+              // פורמט שעה — HH:MM
               centralNextAt = raw;
               centralInterval = null;
+              console.log(`🕐 Central mode: daily rotation at ${centralNextAt}`);
             } else {
+              // פורמט שניות
               centralNextAt = null;
               centralInterval = parseInt(raw) * 1000;
-            }
-          }
-
-            if (window.centralRotationInterval) {
-              clearInterval(window.centralRotationInterval);
-            }
-            if (centralNotices.length > 1) {
-              window.centralRotationInterval = setInterval(rotateCentralNotice, centralInterval);
+              console.log(`⏱️ Central mode: every ${centralInterval / 1000}s`);
             }
           }
 
@@ -875,13 +878,8 @@ function checkCentralTimeRotation() {
           console.log(`📰 Loaded ${centralNotices.length} central notice(s) — using manual URLs`);
 
           rotateCentralNotice();
+          setupCentralRotation(centralNotices.length);
 
-          if (centralNotices.length > 1) {
-            if (window.centralRotationInterval) {
-              clearInterval(window.centralRotationInterval);
-            }
-            window.centralRotationInterval = setInterval(rotateCentralNotice, centralInterval);
-          }
         } else if (data.images && data.images.length > 0) {
           // עדיפות שנייה: תמונות מתיקיית Drive
           centralImages = data.images;
@@ -891,13 +889,7 @@ function checkCentralTimeRotation() {
           console.log(`🖼️ No manual URLs — loaded ${centralImages.length} images from Drive folder`);
 
           rotateCentralNotice();
-
-          if (centralImages.length > 1) {
-            if (window.centralRotationInterval) {
-              clearInterval(window.centralRotationInterval);
-            }
-            window.centralRotationInterval = setInterval(rotateCentralNotice, centralInterval);
-          }
+          setupCentralRotation(centralImages.length);
         }
 
         if (data.sidebar && data.sidebar.length > 0) {
