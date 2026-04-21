@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+  <!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
   <meta charset="UTF-8">
@@ -607,6 +607,8 @@
     let centralImages = [];      // תמונות מתיקיית Drive
     let currentCentralIndex = 0;
     let centralInterval = 10000;
+    let centralNextAt = null;
+    let centralLastRotatedDate = null;
     let tickerInterval = 300000;
     let useDriveImages = false;
 
@@ -656,6 +658,31 @@
       };
       newImg.src = url;
     }
+    function setupCentralRotation(count) {
+      if (window.centralRotationInterval) clearInterval(window.centralRotationInterval);
+      if (window.centralTimeCheckInterval) clearInterval(window.centralTimeCheckInterval);
+    
+      if (!centralNextAt) {
+        if (count > 1) {
+          window.centralRotationInterval = setInterval(rotateCentralNotice, centralInterval);
+        }
+      } else {
+        window.centralTimeCheckInterval = setInterval(checkCentralTimeRotation, 60000);
+      }
+    }
+
+function checkCentralTimeRotation() {
+  if (!centralNextAt) return;
+  const now = new Date();
+  const currentTime = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+  const todayKey = `${now.toDateString()}_${centralNextAt}`;
+  if (currentTime === centralNextAt && centralLastRotatedDate !== todayKey) {
+    centralLastRotatedDate = todayKey;
+    rotateCentralNotice();
+  }
+}
+      
+    
 
     function rotateFooter() {
       if (footerMessages.length === 0) return;
@@ -774,8 +801,15 @@
           }
 
           if (data.config.centralInterval) {
-            centralInterval = data.config.centralInterval * 1000;
-            console.log('⏱️ Central interval updated:', centralInterval / 1000, 'seconds');
+            const raw = String(data.config.centralInterval).trim();
+            if (/^\d{1,2}:\d{2}$/.test(raw)) {
+              centralNextAt = raw;
+              centralInterval = null;
+            } else {
+              centralNextAt = null;
+              centralInterval = parseInt(raw) * 1000;
+            }
+          }
 
             if (window.centralRotationInterval) {
               clearInterval(window.centralRotationInterval);
@@ -1176,7 +1210,7 @@
           }
 
           if (parashaName) {
-            document.getElementById('parashaName').textContent = `פרשת ${parashaName}`;
+            document.getElementById('parashaName').textContent = `${parashaName}`;
           } else {
             document.getElementById('parashaName').textContent = 'זמני שבת';
           }
