@@ -1064,7 +1064,7 @@
 
         const dateData = await dateResponse.json();
 
-        const zmanimUrl = `https://www.hebcal.com/zmanim?cfg=json&latitude=${latitude}&longitude=${longitude}&date=${year}-${month}-${day}`;
+        const zmanimUrl = `https://www.hebcal.com/zmanim?cfg=json&latitude=${latitude}&longitude=${longitude}&date=${year}-${month}-${day}&tzid=Asia/Jerusalem`;
         console.log('🔗 URL:', zmanimUrl);
 
         const zmanimResponse = await fetch(zmanimUrl);
